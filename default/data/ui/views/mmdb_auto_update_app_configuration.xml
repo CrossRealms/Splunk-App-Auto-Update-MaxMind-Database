@@ -1,0 +1,9 @@
+<form>
+  <label>Configuration</label>
+  <fieldset submitButton="false"></fieldset>
+  <row>
+    <panel>
+      <html></html>
+    </panel>
+  </row>
+</form>
