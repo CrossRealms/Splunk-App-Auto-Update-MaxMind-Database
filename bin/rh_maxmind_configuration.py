@@ -2,7 +2,6 @@ import json
 import splunk.admin as admin
 import mmdb_utils
 
-MaxMindLicenseKeyInPasswordStore = 'max_mind_license_key'
 
 
 class MaxMindDBConfRestcall(admin.MConfigHandler):
@@ -33,7 +32,7 @@ class MaxMindDBConfRestcall(admin.MConfigHandler):
 
         try:
             # Store License Key
-            mmdb_utils.CredentialManager(self.getSessionKey()).store_credential(MaxMindLicenseKeyInPasswordStore, maxmind_license_key)
+            mmdb_utils.CredentialManager(self.getSessionKey()).store_credential(mmdb_utils.MaxMindLicenseKeyInPasswordStore, maxmind_license_key)
 
             conf_info['action']['success'] = "MaxMind License key is stored successfully."
 

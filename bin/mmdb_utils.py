@@ -5,6 +5,9 @@ from splunk import rest
 
 APP_NAME = 'maxmind_auto_update_splunk_app'
 
+MaxMindLicenseKeyInPasswordStore = 'max_mind_license_key'
+
+
 class CredentialManager(object):
     '''
     Credential manager to store and retrieve password
