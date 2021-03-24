@@ -1,9 +1,23 @@
 <form>
-  <label>Configuration</label>
+  <label>MaxMind Database Configuration</label>
   <fieldset submitButton="false"></fieldset>
   <row>
     <panel>
-      <html></html>
+      <html>
+        <p id="mmdb_configuration_mmdb_license_key_msg"/>
+        <table style="width:60%">
+          <tr>
+            <td style="text-align:left">MMDB License Key</td>
+            <td style="text-align:left">
+              <input type="password" id="mmdb_configuration_mmdb_license_key" style="margin-bottom:5px;"/>
+            </td>
+            <td style="text-align:left">
+              <button id="mmdb_configuration_mmdb_license_key_button">Save</button>
+            </td>
+          </tr>
+          <p>Create an Account on <a target="_blank" href="https://www.maxmind.com/en/geoip2-services-and-databases">MaxMind</a> and generate a license key from <a target="_blank" href="https://www.maxmind.com/en/accounts/444238/license-key">here</a>.</p>
+        </table>
+      </html>
     </panel>
   </row>
 </form>
