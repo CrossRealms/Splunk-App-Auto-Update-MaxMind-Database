@@ -17,3 +17,6 @@ export = system
 [viewstates]
 access = read : [ * ], write : [ * ]
 export = system
+
+[limits]
+export = system

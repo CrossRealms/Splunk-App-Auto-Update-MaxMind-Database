@@ -1,3 +1,4 @@
 <nav search_view="search" color="#464646">
 	<view name="mmdb_auto_update_app_configuration" default="true"/>
+	<view name="search" />
 </nav>
