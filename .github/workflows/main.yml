@@ -22,24 +22,24 @@ jobs:
       - uses: actions/checkout@v2
         with:
           ref: master
-          path: maxmind_auto_update_splunk_app
+          path: splunk_maxmind_db_auto_update
             
       - name: "Generate Build"
         run: |
-          cd maxmind_auto_update_splunk_app
+          cd splunk_maxmind_db_auto_update
           rm -rf .git
           rm -rf .github
           rm -f .gitignore
           cd ..
-          find maxmind_auto_update_splunk_app -type f -exec chmod 644 '{}' \;
-          find maxmind_auto_update_splunk_app -type d -exec chmod 755 '{}' \;
-          tar -czf maxmind_auto_update_splunk_app.tgz maxmind_auto_update_splunk_app
+          find splunk_maxmind_db_auto_update -type f -exec chmod 644 '{}' \;
+          find splunk_maxmind_db_auto_update -type d -exec chmod 755 '{}' \;
+          tar -czf splunk_maxmind_db_auto_update.tgz splunk_maxmind_db_auto_update
           
       - uses: actions/upload-artifact@v2
         with:
           name: "build"
           path: |
-            maxmind_auto_update_splunk_app.tgz
+            splunk_maxmind_db_auto_update.tgz
       
       - name: "Python Installation"
         uses: actions/setup-python@v2
@@ -58,11 +58,11 @@ jobs:
       - name: "Running App-Inspect"
         run: |
           mkdir test_results || true
-          splunk-appinspect inspect --mode test --data-format junitxml --output-file test_results/appinspect-mode-test.xml maxmind_auto_update_splunk_app.tgz
+          splunk-appinspect inspect --mode test --data-format junitxml --output-file test_results/appinspect-mode-test.xml splunk_maxmind_db_auto_update.tgz
       
       - name: "Running Cloud-Inspect"
         run: |
-          splunk-appinspect inspect --mode precert --included-tags cloud --data-format junitxml --output-file test_results/appinspect-mode-cloud.xml maxmind_auto_update_splunk_app.tgz
+          splunk-appinspect inspect --mode precert --included-tags cloud --data-format junitxml --output-file test_results/appinspect-mode-cloud.xml splunk_maxmind_db_auto_update.tgz
       
       - uses: actions/upload-artifact@v2
         with:

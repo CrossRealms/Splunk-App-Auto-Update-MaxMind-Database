@@ -3,7 +3,7 @@ from six.moves.urllib.parse import quote
 import splunk.entity as entity
 from splunk import rest
 
-APP_NAME = 'maxmind_auto_update_splunk_app'
+APP_NAME = 'splunk_maxmind_db_auto_update'
 
 MaxMindLicenseKeyInPasswordStore = 'max_mind_license_key'
 
