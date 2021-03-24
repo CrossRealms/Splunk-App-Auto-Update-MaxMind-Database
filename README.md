@@ -1,5 +1,5 @@
 # Splunk-App-Auto-Update-MaxMind-Database
-Splunk App that auto updates the max-mind database (used for iplocation command)
+Splunk App that auto updates the max-mind database (used for `iplocation` command)
 
 ### Download from Splunkbase
 TODO
@@ -7,7 +7,7 @@ TODO
 
 OVERVIEW
 --------
-The Splunk app auto updates MaxMind database under $SPLUNK_HOME$/share/. This is automation of steps mentioned here - https://docs.splunk.com/Documentation/Splunk/8.1.3/SearchReference/Iplocation#Updating_the_MMDB_file
+The Splunk app auto updates MaxMind database. The database update happens automatically every week. Also, user can update database just by running a search query. This is automation of steps mentioned here - https://docs.splunk.com/Documentation/Splunk/8.1.3/SearchReference/Iplocation#Updating_the_MMDB_file
 
 
 * Author - CrossRealms International Inc. (Vatsal Jagani)
@@ -49,6 +49,7 @@ CONFIGURATION
 -------------
 * Open the App and perform the configuration.
 * The complete details about configuration is present on the dashboard directly.
+* See troubleshooting for more details.
 
 
 UNINSTALL APP
@@ -56,7 +57,7 @@ UNINSTALL APP
 To uninstall app, user can follow below steps:
 * SSH to the Splunk instance
 * Go to folder apps($SPLUNK_HOME/etc/apps)
-* Remove the `maxmind_auto_update_splunk_app` folder from apps directory
+* Remove the `splunk_maxmind_db_auto_update` folder from apps directory
 * Restart Splunk
 
 KNOWN LIMITATION
@@ -76,8 +77,12 @@ OPEN SOURCE COMPONENTS AND LICENSES
 
 TROUBLESHOOTING
 ---------------
-* Confirm that the database has been updated:
-  * Run `| updatemmdbfile` search to update the database manually.
+* Update database manually.
+  * Run `| maxminddbupdate` search from the `Auto Update MaxMind Database` App.
+  * In idea scenario, it should show message `Max Mind Database updated successfully.`.
+* Confirm that the database location has been updated:
+  * Run `| rest /services/configs/conf-limits splunk_server=local | search title="iplocation" | table title, db_path`.
+  * The results should show `/opt/splunk/etc/apps/splunk_maxmind_db_auto_update/local/mmdb/GeoLite2-City.mmdb`. Where `/opt/splunk` is your Splunk home path, it could be different in your environment.
   * Go to the location of MaxMind database (default: /opt/splunk/share/GeoLite2-City.mmdb file) and see if the last modified time for the file is recent.
 
 
@@ -92,4 +97,4 @@ SUPPORT
 * Contact - CrossRealms International Inc.
   * US: +1-312-2784445
 * License Agreement - https://d38o4gzaohghws.cloudfront.net/static/misc/eula.html
-* Copyright - Copyright Crossrealms Internationals, 2020
+* Copyright - Copyright CrossRealms Internationals, 2021
