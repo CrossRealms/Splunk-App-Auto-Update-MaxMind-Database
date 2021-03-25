@@ -11,7 +11,7 @@ import mmdb_utils
 
 
 
-MaxMindDatabaseDownloadLink = 'https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-ASN&license_key={}&suffix=tar.gz'
+MaxMindDatabaseDownloadLink = 'https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-City&license_key={}&suffix=tar.gz'
 
 LIMITS_CONF_STANZA = 'iplocation'
 LIMITS_CONF_PARAMETER = 'db_path'
@@ -82,13 +82,13 @@ class UpdateMaxMindDatabase(GeneratingCommand):
                 # Find untared folder
                 downloaded_dir = None
                 for filedir in os.listdir(DB_DIR_PATH):
-                    if filedir.startswith("GeoLite2-ASN"):
+                    if filedir.startswith("GeoLite2-City"):
                         downloaded_dir = os.path.join(DB_DIR_PATH, filedir)
                         break
                 # Find downloaded file
                 donwloaded_file = None
                 for filedir in os.listdir(downloaded_dir):
-                    if filedir.startswith("GeoLite2-ASN"):
+                    if filedir.startswith("GeoLite2-City"):
                         donwloaded_file = os.path.join(downloaded_dir, filedir)
                         break
                 # Move extracted file to correct location

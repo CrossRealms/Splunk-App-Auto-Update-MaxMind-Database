@@ -10,12 +10,12 @@ OVERVIEW
 The Splunk app auto updates MaxMind database. The database update happens automatically every week. Also, user can update database just by running a search query. This is automation of steps mentioned here - https://docs.splunk.com/Documentation/Splunk/8.1.3/SearchReference/Iplocation#Updating_the_MMDB_file
 
 
-* Author - CrossRealms International Inc. (Vatsal Jagani)
+* Author - Vatsal Jagani
 * Version - 1.0.0
 * Build - 1
 * Creates Index - False
 * Compatible with:
-   * Splunk Enterprise version: 8.0, 7.3, 7.2 and 7.1
+   * Splunk Enterprise version: 8.1, 8.0, 7.3
    * OS: Platform independent
    * Browser: Google Chrome, Mozilla Firefox, Safari
 
@@ -79,17 +79,11 @@ TROUBLESHOOTING
 ---------------
 * Update database manually.
   * Run `| maxminddbupdate` search from the `Auto Update MaxMind Database` App.
-  * In idea scenario, it should show message `Max Mind Database updated successfully.`.
+  * In ideal scenario, it should show message `Max Mind Database updated successfully.`.
 * Confirm that the database location has been updated:
   * Run `| rest /services/configs/conf-limits splunk_server=local | search title="iplocation" | table title, db_path`.
   * The results should show `/opt/splunk/etc/apps/splunk_maxmind_db_auto_update/local/mmdb/GeoLite2-City.mmdb`. Where `/opt/splunk` is your Splunk home path, it could be different in your environment.
-  * Go to the location of MaxMind database (default: /opt/splunk/share/GeoLite2-City.mmdb file) and see if the last modified time for the file is recent.
 
-
-CONTRIBUTORS
-------------
-* Vatsal Jagani
-* Preston Carter
 
 
 SUPPORT
