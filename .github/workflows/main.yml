@@ -29,6 +29,7 @@ jobs:
           cd splunk_maxmind_db_auto_update
           rm -rf .git
           rm -rf .github
+          rm -rf backup_app_icons
           rm -f .gitignore
           cd ..
           find splunk_maxmind_db_auto_update -type f -exec chmod 644 '{}' \;
