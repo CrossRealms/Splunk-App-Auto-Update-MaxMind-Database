@@ -1,5 +1,7 @@
 import json
 import splunk.admin as admin
+import splunk.bundle as bundle
+import splunk.rest as rest
 import mmdb_utils
 
 
@@ -19,6 +21,22 @@ class MaxMindDBConfRestcall(admin.MConfigHandler):
         # Set up the valid parameters
         for arg in ['data']:
             self.supportedArgs.addOptArg(arg)
+
+
+    def app_configured(self):
+        sessionKey = self.getSessionKey()
+        try:
+            conf = bundle.getConf('app', sessionKey, namespace=mmdb_utils.APP_NAME, owner='nobody')
+            stanza = conf.stanzas['install'].findKeys('is_configured')
+            if stanza:
+                if stanza["is_configured"] == "0" or stanza["is_configured"] == "false":
+                    conf["install"]["is_configured"] = 'true'
+                    rest.simpleRequest("/apps/local/{}/_reload".format(mmdb_utils.APP_NAME), sessionKey=sessionKey)
+            else:
+                conf["install"]["is_configured"] = 'true'
+                rest.simpleRequest("/apps/local/{}/_reload".format(mmdb_utils.APP_NAME), sessionKey=sessionKey)
+        except Exception as e:
+            raise Exception('Unable to set is_configured parameter in local app.conf file. {}'.format(e))
     
 
     def handleEdit(self, conf_info):
@@ -33,6 +51,8 @@ class MaxMindDBConfRestcall(admin.MConfigHandler):
         try:
             # Store License Key
             mmdb_utils.CredentialManager(self.getSessionKey()).store_credential(mmdb_utils.MaxMindLicenseKeyInPasswordStore, maxmind_license_key)
+
+            self.app_configured()
 
             conf_info['action']['success'] = "MaxMind License key is stored successfully."
 
