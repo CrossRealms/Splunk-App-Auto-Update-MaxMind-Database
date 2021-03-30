@@ -26,7 +26,7 @@ DB_TEMP_DOWNLOAD = os.path.join(DB_DIR_PATH, "temp_file.tar.gz")
 DB_PATH_TO_SET = os.path.join(DB_DIR_PATH, MMDB_FILE_NAME)
 
 
-@Configuration()
+@Configuration(type='reporting')
 class UpdateMaxMindDatabase(GeneratingCommand):
 
     def get_max_mind_license_key(self):

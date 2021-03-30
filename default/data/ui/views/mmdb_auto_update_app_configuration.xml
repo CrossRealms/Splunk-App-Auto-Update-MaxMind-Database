@@ -21,7 +21,7 @@
       <html>
         <div>
           <p>The App updates the database automatically every week.</p>
-          <p>You can also update the database manually by running <a target="_blank" href="/app/splunk_maxmind_db_auto_update/search?q=%7C%20maxminddbupdate%20%7C%20table%20Message&amp;display.page.search.mode=smart&amp;dispatch.sample_ratio=1&amp;earliest=-24h%40h&amp;latest=now&amp;display.page.search.tab=statistics&amp;display.general.type=statistics">this search</a>.</p>
+          <p>You can also update the database manually by running <a target="_blank" href="/app/splunk_maxmind_db_auto_update/search?q=%7C%20maxminddbupdate&amp;display.page.search.mode=smart&amp;dispatch.sample_ratio=1&amp;earliest=-24h%40h&amp;latest=now&amp;display.page.search.tab=statistics&amp;display.general.type=statistics">this search</a>.</p>
         </div>
       </html>
     </panel>
