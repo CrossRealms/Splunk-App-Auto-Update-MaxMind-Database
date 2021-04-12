@@ -11,7 +11,7 @@ The Splunk app auto updates MaxMind database. The database update happens automa
 
 
 * Author - Vatsal Jagani
-* Version - 1.0.0
+* Version - 1.0.1
 * Build - 1
 * Creates Index - False
 * Compatible with:
@@ -52,6 +52,33 @@ CONFIGURATION
 * See troubleshooting for more details.
 
 
+INSTALLATION AND CONFIGURATION FOR INDEXER CLUSTER
+--------------------------------------------------
+* `iplocation` is distributed command, so based on search queries Splunk will decide whether the command is executed on SH or indexers. So it is recommended to deploy the App on Search Head as well as on indexers.
+* Follow below steps to deploy App on indexers.
+
+### Way-1: Deploy on all indexers from cluster master.
+Note - If you do not want to add Max Mind License key in plain text, use `Way-2`.
+
+* App will be pushed from cluster master so, you don't have to deploy App manually on each indexer separately.
+* Download the App build from Splunkbase.
+* Extract the downloaded app build on Cluster master's `$SPLUNK_HOME/etc/master-apps/` directory.
+* Create `local` directory under `$SPLUNK_HOME/etc/master-apps/splunk_maxmind_db_auto_update/`.
+* Add `app.conf` file in the newly created local folder.
+```
+[install]
+is_configured = 1
+```
+* Add `passwords.conf` file in the newly created local folder. And replace `<LICENSE_KEY>` in the below code with your MaxMind license key.
+```
+[credential:splunk_maxmind_db_auto_update:max_mind_license_key``splunk_cred_sep``1:]
+password = <LICENSE_KEY>
+```
+
+### Way-2: Deploy on each indexer manually
+Follow `INSTALLATION` and `CONFIGURATION` section from above to install and deploy app on indexer. The process is same as hwo you deploy App on Search Head.
+
+
 UNINSTALL APP
 -------------
 To uninstall app, user can follow below steps:
@@ -66,6 +93,9 @@ KNOWN LIMITATION
 
 RELEASE NOTES
 -------------
+Version 1.0.1 (April 2021)
+* Added better error handling.
+
 Version 1.0.0 (March 2021)
 * App created based on URL from March 2021 on MaxMind to download the database.
 

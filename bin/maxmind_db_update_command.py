@@ -6,6 +6,7 @@ import requests
 import tarfile
 
 from splunklib.searchcommands import dispatch, GeneratingCommand, Configuration
+import splunk.appserver.mrsparkle.lib.util as splunk_lib_util
 from splunk import rest
 import mmdb_utils
 
@@ -19,7 +20,6 @@ LIMITS_CONF_PARAMETER = 'db_path'
 MMDB_PATH_DIR = 'mmdb'
 MMDB_FILE_NAME = 'GeoLite2-City.mmdb'
 
-import splunk.appserver.mrsparkle.lib.util as splunk_lib_util
 APP_LOCAL_PATH = splunk_lib_util.make_splunkhome_path(["etc", "apps", mmdb_utils.APP_NAME, "local"])
 DB_DIR_PATH = os.path.join(APP_LOCAL_PATH, MMDB_PATH_DIR)
 DB_TEMP_DOWNLOAD = os.path.join(DB_DIR_PATH, "temp_file.tar.gz")
@@ -63,7 +63,19 @@ class UpdateMaxMindDatabase(GeneratingCommand):
         }
         endpoint = '/servicesNS/nobody/{}/configs/conf-{}'.format(mmdb_utils.APP_NAME, 'limits')
         response_status, response_content = rest.simpleRequest(endpoint,
-                sessionKey=sessionKey, getargs={'output_mode':'json'}, postargs=postargs, method='POST', raiseAllErrors=True)
+                sessionKey=sessionKey, getargs={'output_mode':'json'}, postargs=postargs, method='POST')
+        if response_status.status == 201 or response_status.status == 201:
+            return   # success or created
+        elif response_status.status == 409:
+            # When stanza is already exist
+            postargs2 = {
+                LIMITS_CONF_PARAMETER: DB_PATH_TO_SET
+            }
+            endpoint2 = '/servicesNS/nobody/{}/configs/conf-{}/'.format(mmdb_utils.APP_NAME, 'limits', LIMITS_CONF_STANZA)
+            response_status2, response_content2 = rest.simpleRequest(endpoint2,
+                    sessionKey=sessionKey, getargs={'output_mode':'json'}, postargs=postargs2, method='POST', raiseAllErrors=True)
+        else:
+            raise Exception("[HTTP {}] {}".format(response_status.status, response_content))            
 
 
     def download_mmdb_database(self, license_key):
@@ -86,13 +98,13 @@ class UpdateMaxMindDatabase(GeneratingCommand):
                         downloaded_dir = os.path.join(DB_DIR_PATH, filedir)
                         break
                 # Find downloaded file
-                donwloaded_file = None
+                downloaded_file = None
                 for filedir in os.listdir(downloaded_dir):
                     if filedir.startswith("GeoLite2-City"):
-                        donwloaded_file = os.path.join(downloaded_dir, filedir)
+                        downloaded_file = os.path.join(downloaded_dir, filedir)
                         break
                 # Move extracted file to correct location
-                shutil.move(donwloaded_file, DB_PATH_TO_SET)
+                shutil.move(downloaded_file, DB_PATH_TO_SET)
                 # remove temp files
                 shutil.rmtree(downloaded_dir)
                 os.remove(DB_TEMP_DOWNLOAD)
