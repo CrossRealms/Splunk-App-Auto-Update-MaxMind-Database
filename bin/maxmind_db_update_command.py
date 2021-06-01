@@ -94,7 +94,7 @@ class UpdateMaxMindDatabase(GeneratingCommand):
                 # Find untared folder
                 downloaded_dir = None
                 for filedir in os.listdir(DB_DIR_PATH):
-                    if filedir.startswith("GeoLite2-City"):
+                    if filedir.startswith("GeoLite2-City_"):
                         downloaded_dir = os.path.join(DB_DIR_PATH, filedir)
                         break
                 # Find downloaded file
