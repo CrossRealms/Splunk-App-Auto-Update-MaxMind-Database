@@ -11,7 +11,7 @@ The Splunk app auto updates MaxMind database. The database update happens automa
 
 
 * Author - Vatsal Jagani
-* Version - 1.0.1
+* Version - 1.0.2
 * Build - 1
 * Creates Index - False
 * Compatible with:
@@ -93,6 +93,9 @@ KNOWN LIMITATION
 
 RELEASE NOTES
 -------------
+Version 1.0.2 (June 2021)
+* Fixed the small issue in python custom command.
+
 Version 1.0.1 (April 2021)
 * Added better error handling.
 
