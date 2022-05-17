@@ -79,7 +79,22 @@ class UpdateMaxMindDatabase(GeneratingCommand):
 
 
     def download_mmdb_database(self, license_key):
-        r = requests.get(MaxMindDatabaseDownloadLink.format(license_key), allow_redirects=True)
+        proxies = {
+            "http" : "http://<ip-address>:<port>",
+            "https" : "https://<ip-address>:<port>"
+        }
+
+        '''
+        # Use following format if using proxy with credentials
+
+        proxies = {
+            "http" : "http://<username>:<password>@<ip-address>:<port>",
+            "https" : "https://<username>:<password>@<ip-address>:<port>"
+        }
+        '''
+
+        r = requests.get(MaxMindDatabaseDownloadLink.format(license_key), allow_redirects=True, proxies=proxies)
+        
         if r.status_code == 200:
             open(DB_TEMP_DOWNLOAD, 'wb').write(r.content)
             try:
