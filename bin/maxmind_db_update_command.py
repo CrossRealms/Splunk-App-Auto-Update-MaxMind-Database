@@ -79,19 +79,16 @@ class UpdateMaxMindDatabase(GeneratingCommand):
 
 
     def download_mmdb_database(self, license_key):
-        proxies = {
-            "http" : "http://<ip-address>:<port>",
-            "https" : "https://<ip-address>:<port>"
-        }
 
-        '''
-        # Use following format if using proxy with credentials
-
+        # NOTE - Proxy Configuration
+        # Remove '<username>:<password>@' part if using proxy without authentication (just use ip:port format)
+        # Understand the risk of storing password in plain-text when using proxy with authentication
         proxies = {
             "http" : "http://<username>:<password>@<ip-address>:<port>",
             "https" : "https://<username>:<password>@<ip-address>:<port>"
         }
-        '''
+
+        # NOTE - Please visit GitHub page (https://github.com/VatsalJagani/Splunk-App-Auto-Update-MaxMind-Database), if you are developer and want to help improving this App in anyways
 
         r = requests.get(MaxMindDatabaseDownloadLink.format(license_key), allow_redirects=True, proxies=proxies)
         
