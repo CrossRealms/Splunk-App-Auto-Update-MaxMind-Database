@@ -11,8 +11,6 @@ The Splunk app auto updates MaxMind database. The database update happens automa
 
 
 * Author - Vatsal Jagani
-* Version - 1.0.4
-* Build - 1
 * Creates Index - False
 * Compatible with:
    * Splunk Enterprise version: 8.1, 8.0, 7.3, 7.2
@@ -93,6 +91,9 @@ KNOWN LIMITATION
 
 RELEASE NOTES
 -------------
+Version 1.1.0 (June 2022)
+* Provided support for search head cluster and resolve cloud app-inspect issue.
+
 Version 1.0.4 (Dec 2021)
 * Added app.manifest file for Splunk-cloud.
 
