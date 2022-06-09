@@ -7,4 +7,4 @@ if __name__ == "__main__":
     try:
         mmdb_utils.MaxMindDatabaseUtil(session_key)
     except Exception as e:
-        pass # log e (it's a message)
+        sys.stderr.write("Error: {}".format(e))
