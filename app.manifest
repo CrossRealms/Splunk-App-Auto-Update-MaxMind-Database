@@ -41,7 +41,7 @@
     }
   },
   "dependencies": null,
-  "tasks": null,
+  "tasks": ["script://./bin/maxmind_db_update_input.py"],
   "inputGroups": null,
   "incompatibleApps": null,
   "platformRequirements": {
