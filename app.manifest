@@ -41,7 +41,7 @@
     }
   },
   "dependencies": null,
-  "tasks": ["script://./bin/maxmind_db_update_input.py"],
+  "tasks": ["script://$SPLUNK_HOME/etc/apps/splunk_maxmind_db_auto_update/bin/maxmind_db_update_input.py"],
   "inputGroups": null,
   "incompatibleApps": null,
   "platformRequirements": {
