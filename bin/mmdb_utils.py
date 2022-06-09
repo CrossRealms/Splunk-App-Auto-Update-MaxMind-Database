@@ -168,10 +168,13 @@ class MaxMindDatabaseUtil(object):
         # NOTE - Proxy Configuration
         # Remove '<username>:<password>@' part if using proxy without authentication (just use ip:port format)
         # Understand the risk of storing password in plain-text when using proxy with authentication
+        proxies = None
+        '''
         proxies = {
             "http" : "<proxy-supported-schema http|https>://<username>:<password>@<ip-address>:<port>",
             "https" : "<proxy-supported-schema http|https>://<username>:<password>@<ip-address>:<port>"
         }
+        '''
 
         # NOTE - Please visit GitHub page (https://github.com/VatsalJagani/Splunk-App-Auto-Update-MaxMind-Database), if you are developer and want to help improving this App in anyways
 
