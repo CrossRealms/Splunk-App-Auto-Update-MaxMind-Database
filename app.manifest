@@ -5,7 +5,7 @@
     "id": {
       "group": null,
       "name": "splunk_maxmind_db_auto_update",
-      "version": "1.0.4"
+      "version": "1.1.0"
     },
     "author": [
       {
@@ -41,7 +41,7 @@
     }
   },
   "dependencies": null,
-  "tasks": null,
+  "tasks": ["script://$SPLUNK_HOME/etc/apps/splunk_maxmind_db_auto_update/bin/maxmind_db_update_input.py"],
   "inputGroups": null,
   "incompatibleApps": null,
   "platformRequirements": {

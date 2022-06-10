@@ -50,7 +50,7 @@ class MaxMindDBConfRestcall(admin.MConfigHandler):
 
         try:
             # Store License Key
-            mmdb_utils.CredentialManager(self.getSessionKey()).store_credential(mmdb_utils.MaxMindLicenseKeyInPasswordStore, maxmind_license_key)
+            mmdb_utils.CredentialManager(self.getSessionKey()).store_credential(mmdb_utils.MAXMIND_LICENSE_KEY_IN_PASSWORD_STORE, maxmind_license_key)
 
             self.app_configured()
 
