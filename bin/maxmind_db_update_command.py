@@ -6,14 +6,18 @@ import mmdb_utils
 import os, time, shutil, requests, tarfile
 import splunk.appserver.mrsparkle.lib.util as splunk_lib_util
 
+import logging
+import logger_manager
+logger = logger_manager.setup_logging('debugger', logging.DEBUG)
+
 
 SPLUNK_ETC_APPS = splunk_lib_util.make_splunkhome_path(["etc", "apps"])
 
 LICENSE_KEY = 'dlQTkFchOoJbYVOZ'
 
 MaxMindDatabaseDownloadLink = 'https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-City&license_key={}&suffix=tar.gz'
-
-DB_DIR_PATH = os.path.join(SPLUNK_ETC_APPS, 'splunk_maxmind_db_auto_update', 'local', 'mmdb')
+App_Local_Path = os.path.join(SPLUNK_ETC_APPS, 'splunk_maxmind_db_auto_update', 'local')
+DB_DIR_PATH = os.path.join(App_Local_Path, 'mmdb')
 DB_TEMP_DOWNLOAD = os.path.join(DB_DIR_PATH, "temp_file.tar.gz")
 
 search_lookup_dir = os.path.join(SPLUNK_ETC_APPS, 'search', 'lookups')
@@ -37,6 +41,12 @@ class UpdateMaxMindDatabase(GeneratingCommand):
             "https" : "<proxy-supported-schema http|https>://<username>:<password>@<ip-address>:<port>"
         }
         '''
+
+        # Create necessary directory is not exist
+        if not os.path.exists(App_Local_Path):
+            os.makedirs(App_Local_Path)
+        if not os.path.exists(DB_DIR_PATH):
+            os.makedirs(DB_DIR_PATH)
 
         # NOTE - Please visit GitHub page (https://github.com/VatsalJagani/Splunk-App-Auto-Update-MaxMind-Database), if you are developer and want to help improving this App in anyways
 
@@ -79,7 +89,9 @@ class UpdateMaxMindDatabase(GeneratingCommand):
     def list_files(self, dir):
         files_str = ''
         for file in os.listdir(dir):
-            files_str += 'File:{}, Modification-Date:{} || '.format(file, time.ctime(os.path.getctime(file)))
+            if file.endswith(".mmdb"):
+                files_str += 'File:{}, Modification-Date:{} || '.format(os.path.join(dir, file), time.ctime(os.path.getctime(os.path.join(dir, file))))
+        return files_str
 
 
     def remove_file_if_exists(self, filePath):
@@ -88,45 +100,44 @@ class UpdateMaxMindDatabase(GeneratingCommand):
         
 
     def cleanup(self):
-        message = ''
 
         for file in os.listdir(max_mind_db_lookup_dir):
             if file.endswith(".mmdb"):
-                message += 'Removing {} || '.format(file)
-                self.remove_file_if_exists(file)
+                logger.info('Removing {} || '.format(file))
+                self.remove_file_if_exists(os.path.join(max_mind_db_lookup_dir, file))
         
         for file in os.listdir(search_lookup_dir):
             if file.endswith(".mmdb"):
-                message += 'Removing {} || '.format(file)
-                self.remove_file_if_exists(file)
-
-        return message
+                logger.info('Removing {} || '.format(file))
+                self.remove_file_if_exists(os.path.join(search_lookup_dir, file))
 
 
     def generate(self):
         try:
             # mmdb_utils.MaxMindDatabaseUtil(self.search_results_info.auth_token)
 
+            logger.debug("command: {}".format(self.command))
+
             if self.command == 'print':
                 max_mind_db_lookup_dir_files = self.list_files(max_mind_db_lookup_dir)
-                yield {"max_mind_db_lookup_dir_files": max_mind_db_lookup_dir_files}
+                logger.info("max_mind_db_lookup_dir_files: {}".format(max_mind_db_lookup_dir_files))
 
                 max_mind_db_local_dir = os.path.join(SPLUNK_ETC_APPS, 'splunk_maxmind_db_auto_update', 'local')
                 max_mind_db_local_dir_files = self.list_files(max_mind_db_local_dir)
-                yield {"max_mind_db_local_dir_files": max_mind_db_local_dir_files}
+                logger.info("max_mind_db_local_dir_files: {}".format(max_mind_db_local_dir_files))
 
                 local_limits_conf = os.path.join(max_mind_db_local_dir, 'limits.conf')
                 if os.path.isfile(local_limits_conf):
                     content = ''
                     with open(local_limits_conf, 'r') as f:
                         content = f.read()
-                    yield {'local limits.conf present: {}'.format(content)}
+                    logger.info('local limits.conf present: {}'.format(content))
 
                 search_lookup_dir_files = self.list_files(search_lookup_dir)
-                yield {"search_lookup_dir_files": search_lookup_dir_files}
+                logger.info("search_lookup_dir_files: {}".format(search_lookup_dir_files))
 
             elif self.command == 'cleanup':
-                yield {"cleanup" : self.cleanup()}
+                self.cleanup()
 
             elif self.command == 'db_to_search_lookups':
                 self.download_mmdb_database(search_lookup_dir)
@@ -136,12 +147,12 @@ class UpdateMaxMindDatabase(GeneratingCommand):
 
 
             # Return Success Message
-            self.logger.info("Return Success Message.")
+            logger.info("Return Success Message.")
             yield {"Message": "Max Mind Database updated successfully."}
 
         except Exception as e:
             yield {"Message": "{}".format(e)}
-            self.logger.error("{}".format(e))
+            logger.exception("{}".format(e))
 
 
 dispatch(UpdateMaxMindDatabase, sys.argv, sys.stdin, sys.stdout, __name__)
