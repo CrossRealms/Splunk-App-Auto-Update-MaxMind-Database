@@ -30,6 +30,12 @@ APP_LOOKUP_PATH = os.path.join(APP_PATH, 'lookups')
 
 MMDB_FILE_NEW_PATH = APP_LOOKUP_PATH
 
+'''
+# Enable below if App's lookup directory does not work
+SEARCH_APP_LOOKUP_PATH = splunk_lib_util.make_splunkhome_path(["etc", "apps", 'search', 'lookups'])
+MMDB_FILE_NEW_PATH = SEARCH_APP_LOOKUP_PATH
+'''
+
 DB_DIR_TEMP_PATH = os.path.join(APP_LOCAL_PATH, MMDB_PATH_DIR)
 DB_TEMP_DOWNLOAD = os.path.join(DB_DIR_TEMP_PATH, "temp_file.tar.gz")
 
