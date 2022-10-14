@@ -21,10 +21,20 @@ MaxMindDatabaseDownloadLink = 'https://download.maxmind.com/app/geoip_download?e
 MMDB_PATH_DIR = 'mmdb'
 MMDB_FILE_NAME = 'GeoLite2-City.mmdb'
 
-APP_LOCAL_PATH = splunk_lib_util.make_splunkhome_path(["etc", "apps", APP_NAME, "local"])
-DB_DIR_PATH = os.path.join(APP_LOCAL_PATH, MMDB_PATH_DIR)
-DB_TEMP_DOWNLOAD = os.path.join(DB_DIR_PATH, "temp_file.tar.gz")
-DB_PATH_TO_SET = os.path.join(DB_DIR_PATH, MMDB_FILE_NAME)
+MMDB_FILE_NAME_ACCEPTABLE_UNDER_LOOKUPS_DIR = 'GeoIP2-City.mmdb'
+
+
+APP_PATH = splunk_lib_util.make_splunkhome_path(["etc", "apps", APP_NAME])
+APP_LOCAL_PATH = os.path.join(APP_PATH, 'local')
+APP_LOOKUP_PATH = os.path.join(APP_PATH, 'lookups')
+
+MMDB_FILE_NEW_PATH = APP_LOOKUP_PATH
+
+DB_DIR_TEMP_PATH = os.path.join(APP_LOCAL_PATH, MMDB_PATH_DIR)
+DB_TEMP_DOWNLOAD = os.path.join(DB_DIR_TEMP_PATH, "temp_file.tar.gz")
+
+
+APP_LOCAL_LIMITS_CONF_PATH = os.path.join(APP_LOCAL_PATH, 'limits.conf')
 
 
 
@@ -101,8 +111,8 @@ class MaxMindDatabaseUtil(object):
         # Create necessary directory is not exist
         if not os.path.exists(APP_LOCAL_PATH):
             os.makedirs(APP_LOCAL_PATH)
-        if not os.path.exists(DB_DIR_PATH):
-            os.makedirs(DB_DIR_PATH)
+        if not os.path.exists(DB_DIR_TEMP_PATH):
+            os.makedirs(DB_DIR_TEMP_PATH)
 
         # Read MaxMind license key
         license_key = self.get_max_mind_license_key()
@@ -110,58 +120,22 @@ class MaxMindDatabaseUtil(object):
         if not license_key:
             raise Exception("Max Mind license key not found in password store. Please set the license key from the configuration page.")
 
+        # Updating limits.conf is no longer require from Splunk version 9.x hence cleaning that up
+        self.cleaning_old_version_limits_conf()
+
         # Download mmdb database in a appropriate directory
         self.download_mmdb_database(license_key)
-
-        # Update limits.conf to change the MMDB location
-        self.update_mmdb_location()
 
 
     def get_max_mind_license_key(self):
         return CredentialManager(self.session_key).get_credential(MAXMIND_LICENSE_KEY_IN_PASSWORD_STORE)
 
 
-    def get_mmdb_location(self):
+    def cleaning_old_version_limits_conf(self):
+        if os.path.exists(APP_LOCAL_LIMITS_CONF_PATH):
+            os.remove(APP_LOCAL_LIMITS_CONF_PATH)
 
-        current_location = '/opt/splunk/share/'
-
-        endpoint = '/servicesNS/nobody/{}/configs/conf-{}'.format(APP_NAME, 'limits')
-        response_status, response_content = rest.simpleRequest(endpoint,
-                sessionKey=self.session_key, getargs={'output_mode':'json'}, raiseAllErrors=True)
-        data = json.loads(response_content)['entry']
-        for i in data:
-            if i['name'] == LIMITS_CONF_STANZA:
-                current_location = i['content'][LIMITS_CONF_PARAMETER]
-        
-        return current_location
-
-
-    def update_mmdb_location(self):
-        current_location = self.get_mmdb_location()
-        if current_location == DB_PATH_TO_SET:
-            return
-        
-        # Update location in limits.conf
-        sessionKey = self.session_key
-        postargs = {
-            'name': LIMITS_CONF_STANZA,
-            LIMITS_CONF_PARAMETER: DB_PATH_TO_SET
-        }
-        endpoint = '/servicesNS/nobody/{}/configs/conf-{}'.format(APP_NAME, 'limits')
-        response_status, response_content = rest.simpleRequest(endpoint,
-                sessionKey=sessionKey, getargs={'output_mode':'json'}, postargs=postargs, method='POST')
-        if response_status.status == 201 or response_status.status == 201:
-            return   # success or created
-        elif response_status.status == 409:
-            # When stanza is already exist
-            postargs2 = {
-                LIMITS_CONF_PARAMETER: DB_PATH_TO_SET
-            }
-            endpoint2 = '/servicesNS/nobody/{}/configs/conf-{}/'.format(APP_NAME, 'limits', LIMITS_CONF_STANZA)
-            response_status2, response_content2 = rest.simpleRequest(endpoint2,
-                    sessionKey=sessionKey, getargs={'output_mode':'json'}, postargs=postargs2, method='POST', raiseAllErrors=True)
-        else:
-            raise Exception("[HTTP {}] {}".format(response_status.status, response_content))
+            # TODO - Need to do conf reload (for limits.conf) if we remove file
 
 
     def download_mmdb_database(self, license_key):
@@ -185,7 +159,7 @@ class MaxMindDatabaseUtil(object):
             try:
                 # Extract the downloaded file
                 tar = tarfile.open(DB_TEMP_DOWNLOAD, "r:gz")
-                tar.extractall(path=DB_DIR_PATH)
+                tar.extractall(path=DB_DIR_TEMP_PATH)
                 tar.close()
             except Exception as e:
                 raise Exception("Unable to untar downloaded MaxMind database. {}".format(e))
@@ -193,21 +167,25 @@ class MaxMindDatabaseUtil(object):
             try:
                 # Find untared folder
                 downloaded_dir = None
-                for filedir in os.listdir(DB_DIR_PATH):
+                for filedir in os.listdir(DB_DIR_TEMP_PATH):
                     if filedir.startswith("GeoLite2-City_"):
-                        downloaded_dir = os.path.join(DB_DIR_PATH, filedir)
+                        downloaded_dir = os.path.join(DB_DIR_TEMP_PATH, filedir)
                         break
+
                 # Find downloaded file
                 downloaded_file = None
                 for filedir in os.listdir(downloaded_dir):
                     if filedir.startswith("GeoLite2-City"):
                         downloaded_file = os.path.join(downloaded_dir, filedir)
                         break
-                # Move extracted file to correct location
-                shutil.move(downloaded_file, DB_PATH_TO_SET)
+
+                # Move extracted file to correct location with updated file name
+                shutil.move(downloaded_file, os.path.join(MMDB_FILE_NEW_PATH, MMDB_FILE_NAME_ACCEPTABLE_UNDER_LOOKUPS_DIR))
+
                 # remove temp files
                 shutil.rmtree(downloaded_dir)
                 os.remove(DB_TEMP_DOWNLOAD)
+
             except Exception as e:
                 raise Exception("Unable to perform file operations on MaxMind database file. {}".format(e))
         else:
