@@ -9,6 +9,12 @@ import splunk.entity as entity
 import splunk.appserver.mrsparkle.lib.util as splunk_lib_util
 from splunk import rest
 
+
+import logging
+import logger_manager
+logger = logger_manager.setup_logging('log', logging.DEBUG)
+
+
 APP_NAME = 'splunk_maxmind_db_auto_update'
 
 MAXMIND_LICENSE_KEY_IN_PASSWORD_STORE = 'max_mind_license_key'
@@ -62,6 +68,7 @@ class CredentialManager(object):
         :param username: Username used to search credentials.
         :return: username, password
         '''
+        logger.info("Getting the stored license-key from passwords.conf")
         # list all credentials
         entities = entity.getEntities(["admin", "passwords"], search=APP_NAME, count=-1, namespace=APP_NAME, owner="nobody",
                                     sessionKey=self.session_key)
@@ -82,6 +89,7 @@ class CredentialManager(object):
         :param password: Password to be stored.
         :return: None
         '''
+        logger.info("Storing the license-key in passwords.conf in encrypted form.")
         old_password = self.get_credential(username)
         username = username + "``splunk_cred_sep``1"
 
@@ -112,6 +120,8 @@ class CredentialManager(object):
 class MaxMindDatabaseUtil(object):
 
     def __init__(self, session_key):
+        logger.info("Initialized MaxMindDatabaseUtil")
+
         self.session_key = session_key
 
         # Create necessary directory is not exist
@@ -124,13 +134,17 @@ class MaxMindDatabaseUtil(object):
         license_key = self.get_max_mind_license_key()
 
         if not license_key:
-            raise Exception("Max Mind license key not found in password store. Please set the license key from the configuration page.")
+            msg = "Max Mind license key not found in password store. Please set the license key from the configuration page."
+            logger.error(msg)
+            raise Exception(msg)
 
         # Updating limits.conf is no longer require from Splunk version 9.x hence cleaning that up
         self.cleaning_old_version_limits_conf()
 
         # Download mmdb database in a appropriate directory
         self.download_mmdb_database(license_key)
+
+        logger.info("MaxMind Database file updated successfully.")
 
 
     def get_max_mind_license_key(self):
@@ -139,6 +153,7 @@ class MaxMindDatabaseUtil(object):
 
     def cleaning_old_version_limits_conf(self):
         if os.path.exists(APP_LOCAL_LIMITS_CONF_PATH):
+            logger.info("Removing app-local/limits.conf used with App version older than version 2.0.0")
             os.remove(APP_LOCAL_LIMITS_CONF_PATH)
 
             # TODO - Need to do conf reload (for limits.conf) if we remove file
@@ -158,6 +173,7 @@ class MaxMindDatabaseUtil(object):
 
         # NOTE - Please visit GitHub page (https://github.com/VatsalJagani/Splunk-App-Auto-Update-MaxMind-Database), if you are developer and want to help improving this App in anyways
 
+        logger.debug("Downloading the MaxMind DB file.")
         r = requests.get(MaxMindDatabaseDownloadLink.format(license_key), allow_redirects=True, proxies=proxies)
         
         if r.status_code == 200:
@@ -168,7 +184,8 @@ class MaxMindDatabaseUtil(object):
                 tar.extractall(path=DB_DIR_TEMP_PATH)
                 tar.close()
             except Exception as e:
-                raise Exception("Unable to untar downloaded MaxMind database. {}".format(e))
+                msg = "Unable to untar downloaded MaxMind database. {}".format(e)
+                logger.exception(msg)
 
             try:
                 # Find untared folder
@@ -183,17 +200,20 @@ class MaxMindDatabaseUtil(object):
                 for filedir in os.listdir(downloaded_dir):
                     if filedir.startswith("GeoLite2-City"):
                         downloaded_file = os.path.join(downloaded_dir, filedir)
+                        logger.debug("Downloaded MaxMind DB file: {}".format(downloaded_file))
                         break
 
                 # Move extracted file to correct location with updated file name
-                shutil.move(downloaded_file, os.path.join(MMDB_FILE_NEW_PATH, MMDB_FILE_NAME_ACCEPTABLE_UNDER_LOOKUPS_DIR))
+                lookups_dir_file_location = os.path.join(MMDB_FILE_NEW_PATH, MMDB_FILE_NAME_ACCEPTABLE_UNDER_LOOKUPS_DIR)
+                shutil.move(downloaded_file, lookups_dir_file_location)
+                logger.debug("MaxMind DB file added: {}".format(lookups_dir_file_location))
 
                 # remove temp files
                 shutil.rmtree(downloaded_dir)
                 os.remove(DB_TEMP_DOWNLOAD)
 
             except Exception as e:
-                raise Exception("Unable to perform file operations on MaxMind database file. {}".format(e))
+                logger.exception("Unable to perform file operations on MaxMind database file. {}".format(e))
         else:
-            raise Exception("Unable to download Max Mind database. status_code={}, Content: {}".format(r.status_code, r.content))
+            logger.error("Unable to download Max Mind database. status_code={}, Content: {}".format(r.status_code, r.content))
 
