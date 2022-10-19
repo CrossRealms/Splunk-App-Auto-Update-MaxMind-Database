@@ -27,7 +27,8 @@ MaxMindDatabaseDownloadLink = 'https://download.maxmind.com/app/geoip_download?e
 MMDB_PATH_DIR = 'mmdb'
 MMDB_FILE_NAME = 'GeoLite2-City.mmdb'
 
-MMDB_FILE_NAME_ACCEPTABLE_UNDER_LOOKUPS_DIR = 'GeoIP2-City.mmdb'
+ACCEPTED_LOOKUP_NAME = 'GeoIP2-City.mmdb'
+LOOKUP_FILE_LOCATION = splunk_lib_util.make_splunkhome_path(['var', 'run','splunk', 'lookup_tmp', MMDB_FILE_NAME])
 
 
 APP_PATH = splunk_lib_util.make_splunkhome_path(["etc", "apps", APP_NAME])
@@ -144,6 +145,16 @@ class MaxMindDatabaseUtil(object):
         # Download mmdb database in a appropriate directory
         self.download_mmdb_database(license_key)
 
+        flag = self.is_lookup_present()
+        logger.debug("is_lookup_present = {}".format(flag))
+
+        if flag:
+            logger.debug("Updating the lookup")
+            self.update_lookup()
+        else:
+            logger.debug("Creating the lookup")
+            self.create_lookup()
+
         logger.info("MaxMind Database file updated successfully.")
 
 
@@ -157,6 +168,39 @@ class MaxMindDatabaseUtil(object):
             os.remove(APP_LOCAL_LIMITS_CONF_PATH)
 
             # TODO - Need to do conf reload (for limits.conf) if we remove file
+
+
+    def is_lookup_present(self):
+        _, content = rest.simpleRequest(
+                "/servicesNS/nobody/search/data/lookup-table-files",
+                self.session_key,
+                getargs= {'output_mode': 'json', 'count': '0'},
+                method='GET', raiseAllErrors=True)
+
+        data = json.loads(content)['entry']
+        for item in data:
+            if item['name'] == ACCEPTED_LOOKUP_NAME:
+                return True
+        else:
+            return False
+
+
+    def create_lookup(self):
+        rest.simpleRequest(
+                "/servicesNS/nobody/search/data/lookup-table-files",
+                self.session_key,
+                getargs= {'output_mode': 'json', 'count': '0'},
+                postargs= {'name': ACCEPTED_LOOKUP_NAME, 'eai:data': LOOKUP_FILE_LOCATION},
+                method='POST', raiseAllErrors=True)
+
+
+    def update_lookup(self):
+        rest.simpleRequest(
+                "/servicesNS/nobody/search/data/lookup-table-files/" + ACCEPTED_LOOKUP_NAME,
+                self.session_key,
+                getargs= {'output_mode': 'json', 'count': '0'},
+                postargs= {'eai:data': LOOKUP_FILE_LOCATION},
+                method='POST', raiseAllErrors=True)
 
 
     def download_mmdb_database(self, license_key):
@@ -203,10 +247,9 @@ class MaxMindDatabaseUtil(object):
                         logger.debug("Downloaded MaxMind DB file: {}".format(downloaded_file))
                         break
 
-                # Move extracted file to correct location with updated file name
-                lookups_dir_file_location = os.path.join(MMDB_FILE_NEW_PATH, MMDB_FILE_NAME_ACCEPTABLE_UNDER_LOOKUPS_DIR)
-                shutil.move(downloaded_file, lookups_dir_file_location)
-                logger.debug("MaxMind DB file added: {}".format(lookups_dir_file_location))
+                # Move extracted file to lookup_tmp location with updated file name
+                shutil.move(downloaded_file, LOOKUP_FILE_LOCATION)
+                logger.debug("MaxMind DB file added: {}".format(LOOKUP_FILE_LOCATION))
 
                 # remove temp files
                 shutil.rmtree(downloaded_dir)
