@@ -164,10 +164,17 @@ class MaxMindDatabaseUtil(object):
 
     def cleaning_old_version_limits_conf(self):
         if os.path.exists(APP_LOCAL_LIMITS_CONF_PATH):
-            logger.info("Removing app-local/limits.conf used with App version older than version 2.0.0")
+            logger.info("Removing app-local/limits.conf")
             os.remove(APP_LOCAL_LIMITS_CONF_PATH)
+            self.reload_limits_conf()
 
-            # TODO - Need to do conf reload (for limits.conf) if we remove file
+
+    def reload_limits_conf(self):
+        rest.simpleRequest(
+                "/servicesNS/-/-/admin/limits/_reload",
+                self.session_key,
+                getargs= {'output_mode': 'json', 'count': '0'},
+                method='GET', raiseAllErrors=True)
 
 
     def is_lookup_present(self):
