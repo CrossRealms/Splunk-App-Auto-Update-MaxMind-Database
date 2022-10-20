@@ -28,7 +28,8 @@ MMDB_PATH_DIR = 'mmdb'
 MMDB_FILE_NAME = 'GeoLite2-City.mmdb'
 
 ACCEPTED_LOOKUP_NAME = 'GeoIP2-City.mmdb'
-LOOKUP_FILE_LOCATION = splunk_lib_util.make_splunkhome_path(['var', 'run','splunk', 'lookup_tmp', MMDB_FILE_NAME])
+LOOKUP_DIR_LOCATION = splunk_lib_util.make_splunkhome_path(['var', 'run','splunk', 'lookup_tmp'])
+LOOKUP_FILE_LOCATION = os.path.join(LOOKUP_DIR_LOCATION, MMDB_FILE_NAME)
 
 
 APP_PATH = splunk_lib_util.make_splunkhome_path(["etc", "apps", APP_NAME])
@@ -130,6 +131,8 @@ class MaxMindDatabaseUtil(object):
             os.makedirs(APP_LOCAL_PATH)
         if not os.path.exists(DB_DIR_TEMP_PATH):
             os.makedirs(DB_DIR_TEMP_PATH)
+        if not os.path.exists(LOOKUP_DIR_LOCATION):
+            os.makedirs(LOOKUP_DIR_LOCATION)
 
         # Read MaxMind license key
         license_key = self.get_max_mind_license_key()
