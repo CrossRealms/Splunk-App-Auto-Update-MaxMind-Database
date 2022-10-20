@@ -262,8 +262,7 @@ class MaxMindDatabaseUtil(object):
                 logger.debug("MaxMind DB file added: {}".format(LOOKUP_FILE_LOCATION))
 
                 # remove temp files
-                shutil.rmtree(downloaded_dir)
-                os.remove(DB_TEMP_DOWNLOAD)
+                shutil.rmtree(DB_DIR_TEMP_PATH)
 
             except Exception as e:
                 logger.exception("Unable to perform file operations on MaxMind database file. {}".format(e))
