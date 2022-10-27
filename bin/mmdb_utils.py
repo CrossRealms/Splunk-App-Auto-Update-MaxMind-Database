@@ -34,15 +34,7 @@ LOOKUP_FILE_LOCATION = os.path.join(LOOKUP_DIR_LOCATION, MMDB_FILE_NAME)
 
 APP_PATH = splunk_lib_util.make_splunkhome_path(["etc", "apps", APP_NAME])
 APP_LOCAL_PATH = os.path.join(APP_PATH, 'local')
-APP_LOOKUP_PATH = os.path.join(APP_PATH, 'lookups')
 
-MMDB_FILE_NEW_PATH = APP_LOOKUP_PATH
-
-'''
-# Enable below if App's lookup directory does not work
-SEARCH_APP_LOOKUP_PATH = splunk_lib_util.make_splunkhome_path(["etc", "apps", 'search', 'lookups'])
-MMDB_FILE_NEW_PATH = SEARCH_APP_LOOKUP_PATH
-'''
 
 DB_DIR_TEMP_PATH = os.path.join(APP_LOCAL_PATH, MMDB_PATH_DIR)
 DB_TEMP_DOWNLOAD = os.path.join(DB_DIR_TEMP_PATH, "temp_file.tar.gz")
@@ -156,8 +148,7 @@ class MaxMindDatabaseUtil(object):
             self.create_lookup()
 
         # The limits.conf is no longer required from Splunk version 9.x hence cleaning that up
-        self.cleaning_old_version_limits_conf()
-        self.remove_old_mmdb_location()
+        self.cleanup_old_version_limits_conf()
 
         logger.info("MaxMind Database file updated successfully.")
 
@@ -180,21 +171,19 @@ class MaxMindDatabaseUtil(object):
         return current_location
 
 
-    def remove_old_mmdb_location(self):
-        current_location = self.get_mmdb_location()
-        logger.debug("dbpath value from iplocation stanza = {}".format(current_location))
-        if current_location == OLD_DB_PATH:        
-            # set empty value in dbpath
-            rest.simpleRequest(
-                '/servicesNS/nobody/{}/configs/conf-{}/{}'.format(APP_NAME, 'limits', LIMITS_CONF_STANZA),
-                sessionKey=self.session_key,
-                getargs={'output_mode':'json'},
-                postargs={LIMITS_CONF_PARAMETER: ''},
-                method='POST', raiseAllErrors=True)
-
-
-    def cleaning_old_version_limits_conf(self):
+    def cleanup_old_version_limits_conf(self):
         if os.path.exists(APP_LOCAL_LIMITS_CONF_PATH):
+            current_location = self.get_mmdb_location()
+            logger.debug("dbpath value from iplocation stanza = {}".format(current_location))
+            if current_location == OLD_DB_PATH:
+                # set empty value in dbpath
+                rest.simpleRequest(
+                    '/servicesNS/nobody/{}/configs/conf-{}/{}'.format(APP_NAME, 'limits', LIMITS_CONF_STANZA),
+                    sessionKey=self.session_key,
+                    getargs={'output_mode':'json'},
+                    postargs={LIMITS_CONF_PARAMETER: ''},
+                    method='POST', raiseAllErrors=True)
+
             logger.info("Removing app-local/limits.conf")
             os.remove(APP_LOCAL_LIMITS_CONF_PATH)
 
