@@ -26,6 +26,7 @@ jobs:
         env:
           SPLUNK_APP_ACTION_1: "rm -rf backup_app_icons"
           SPLUNK_APP_ACTION_2: "rm -f .gitignore"
+          SPLUNK_APP_ACTION_3: "rm -rf Note_*"
         with:
           app_dir: "."
           app_build_name: "splunk_maxmind_db_auto_update"
