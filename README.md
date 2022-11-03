@@ -70,7 +70,7 @@ KNOWN LIMITATION
 
 RELEASE NOTES
 -------------
-Version 2.0.0 (October 2022)
+Version 2.0.0 (November 2022)
 * Support for distributed environment without installing App on the Indexers.
 * Support for Search head cluster without running the process on the all the search head by replicating the file through lookups folder.
 * Support for Splunk Cloud Classic stacks by removing inputs.conf and the whole process runs by custom command in a scheduled savedsearch.
@@ -81,7 +81,7 @@ Upgrade Guide for version 2.0.0 from previous Version
 * Cloud: Just upgrade the App from Splunk Cloud UI.
 * Post upgrade (for both On-Prem and Cloud) please execute the validation steps:
   * Run `| maxminddbupdate` search from the `Auto Update MaxMind Database` App.
-    * In ideal scenario, it should show message `Max Mind Database updated successfully.` to show that License key is updated successfully.
+    * In ideal scenario, it should show message `Max Mind Database updated successfully.`
 
 
 
@@ -121,8 +121,8 @@ TROUBLESHOOTING
   * Run `| maxminddbupdate` search from the `Auto Update MaxMind Database` App.
   * In ideal scenario, it should show message `Max Mind Database updated successfully.`.
 
-TODO - Add other information if something we can use to track and see if our app's lookups folder's mmdb file is being used or not?
-(If there is)
+* App Logs
+  * Run `index=_internal sourcetype="auto_update_maxmind_db:logs"` in the search to see app's internal logs
 
 
 
