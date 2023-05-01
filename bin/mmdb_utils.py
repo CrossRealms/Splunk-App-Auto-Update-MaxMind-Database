@@ -1,7 +1,7 @@
 import os
 import json
 import requests
-import tarfile
+import gzip
 import shutil
 from six.moves.urllib.parse import quote
 
@@ -17,12 +17,15 @@ logger = logger_manager.setup_logging('log', logging.DEBUG)
 
 APP_NAME = 'splunk_maxmind_db_auto_update'
 
+MMDB_CONF_FILE = 'mmdb_configuration'
+MMDB_CONF_STANZA = 'mmdb'
+
 MAXMIND_LICENSE_KEY_IN_PASSWORD_STORE = 'max_mind_license_key'
 
 LIMITS_CONF_STANZA = 'iplocation'
 LIMITS_CONF_PARAMETER = 'db_path'
 
-MaxMindDatabaseDownloadLink = 'https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-City&license_key={}&suffix=tar.gz'
+MaxMindDatabaseDownloadLink = 'https://updates.maxmind.com/geoip/databases/GeoLite2-City/update?db_md5=00000000000000000000000000000000'
 
 MMDB_PATH_DIR = 'mmdb'
 MMDB_FILE_NAME = 'GeoLite2-City.mmdb'
@@ -37,7 +40,7 @@ APP_LOCAL_PATH = os.path.join(APP_PATH, 'local')
 
 
 DB_DIR_TEMP_PATH = os.path.join(APP_LOCAL_PATH, MMDB_PATH_DIR)
-DB_TEMP_DOWNLOAD = os.path.join(DB_DIR_TEMP_PATH, "temp_file.tar.gz")
+DB_TEMP_DOWNLOAD = os.path.join(DB_DIR_TEMP_PATH, "temp_file.gz")
 
 OLD_DB_PATH = os.path.join(DB_DIR_TEMP_PATH, MMDB_FILE_NAME)
 APP_LOCAL_LIMITS_CONF_PATH = os.path.join(APP_LOCAL_PATH, 'limits.conf')
@@ -126,16 +129,21 @@ class MaxMindDatabaseUtil(object):
         if not os.path.exists(LOOKUP_DIR_LOCATION):
             os.makedirs(LOOKUP_DIR_LOCATION)
 
+        account_id = self.get_max_mind_account_id()
+        if not account_id:
+            msg = "Max Mind Account key not found. Please update config from Max Mind database configuration page."
+            logger.error(msg)
+            raise Exception(msg)
+
         # Read MaxMind license key
         license_key = self.get_max_mind_license_key()
-
         if not license_key:
-            msg = "Max Mind license key not found in password store. Please set the license key from the configuration page."
+            msg = "Max Mind license key not found in password store. Please update config from Max Mind database configuration page.."
             logger.error(msg)
             raise Exception(msg)
 
         # Download mmdb database in a appropriate directory
-        self.download_mmdb_database(license_key)
+        self.download_mmdb_database(account_id, license_key)
 
         flag = self.is_lookup_present()
         logger.debug("is_lookup_present = {}".format(flag))
@@ -151,6 +159,18 @@ class MaxMindDatabaseUtil(object):
         self.cleanup_old_version_limits_conf()
 
         logger.info("MaxMind Database file updated successfully.")
+
+
+    def get_max_mind_account_id(self):
+        _, serverContent = rest.simpleRequest("/servicesNS/nobody/{}/configs/conf-{}/{}?output_mode=json".format(APP_NAME, MMDB_CONF_FILE, MMDB_CONF_STANZA), sessionKey=self.session_key)
+        data = json.loads(serverContent)['entry']
+
+        account_id = ''
+        for i in data:
+            if i['name'] == MMDB_CONF_STANZA:
+                account_id = i['content']['account_id']
+                break
+        return account_id
 
 
     def get_max_mind_license_key(self):
@@ -221,7 +241,7 @@ class MaxMindDatabaseUtil(object):
                 method='POST', raiseAllErrors=True)
 
 
-    def download_mmdb_database(self, license_key):
+    def download_mmdb_database(self, account_id, license_key):
         # NOTE - Proxy Configuration
         # Remove '<username>:<password>@' part if using proxy without authentication (just use ip:port format)
         # Understand the risk of storing password in plain-text when using proxy with authentication
@@ -236,35 +256,25 @@ class MaxMindDatabaseUtil(object):
         # NOTE - Please visit GitHub page (https://github.com/VatsalJagani/Splunk-App-Auto-Update-MaxMind-Database), if you are developer and want to help improving this App in anyways
 
         logger.debug("Downloading the MaxMind DB file.")
-        r = requests.get(MaxMindDatabaseDownloadLink.format(license_key), allow_redirects=True, proxies=proxies)
-        
+        r = requests.get(MaxMindDatabaseDownloadLink, auth=(account_id, license_key), allow_redirects=True, proxies=proxies)
+
         if r.status_code == 200:
-            open(DB_TEMP_DOWNLOAD, 'wb').write(r.content)
+            with open(DB_TEMP_DOWNLOAD, 'wb') as fp:
+                fp.write(r.content)
+
+            downloaded_file = os.path.join(DB_DIR_TEMP_PATH, 'GeoLite2-City.mmdb')
             try:
                 # Extract the downloaded file
-                tar = tarfile.open(DB_TEMP_DOWNLOAD, "r:gz")
-                tar.extractall(path=DB_DIR_TEMP_PATH)
-                tar.close()
+                with gzip.open(DB_TEMP_DOWNLOAD, 'rb') as s_file, open(downloaded_file, 'wb') as d_file:
+                    shutil.copyfileobj(s_file, d_file, 65536)
             except Exception as e:
-                msg = "Unable to untar downloaded MaxMind database. {}".format(e)
+                msg = "Unable to extract downloaded MaxMind database. {}".format(e)
                 logger.exception(msg)
+                raise e
+
+            logger.debug("Downloaded MaxMind DB file: {}".format(downloaded_file))
 
             try:
-                # Find untared folder
-                downloaded_dir = None
-                for filedir in os.listdir(DB_DIR_TEMP_PATH):
-                    if filedir.startswith("GeoLite2-City_"):
-                        downloaded_dir = os.path.join(DB_DIR_TEMP_PATH, filedir)
-                        break
-
-                # Find downloaded file
-                downloaded_file = None
-                for filedir in os.listdir(downloaded_dir):
-                    if filedir.startswith("GeoLite2-City"):
-                        downloaded_file = os.path.join(downloaded_dir, filedir)
-                        logger.debug("Downloaded MaxMind DB file: {}".format(downloaded_file))
-                        break
-
                 # Move extracted file to lookup_tmp location with updated file name
                 shutil.move(downloaded_file, LOOKUP_FILE_LOCATION)
                 logger.debug("MaxMind DB file added: {}".format(LOOKUP_FILE_LOCATION))
