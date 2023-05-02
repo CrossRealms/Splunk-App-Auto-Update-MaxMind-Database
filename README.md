@@ -48,9 +48,13 @@ Follow the below-listed steps to install an App from the bundle:
 
 CONFIGURATION
 -------------
-* Open the App and perform the configuration.
-* The complete details about configuration is present on the dashboard directly.
-* See troubleshooting for more details.
+* Get Account ID and License Key
+  * Create an Account on https://www.maxmind.com/en/geoip2-services-and-databases and generate a license key from going to Account icon on top right and "Manage License Keys".
+
+* App Configuration
+  * Open the App and perform the configuration.
+  * The complete details about configuration is present on the dashboard directly.
+  * See troubleshooting for more details.
 
 
 DEV
@@ -133,8 +137,6 @@ OPEN SOURCE COMPONENTS AND LICENSES
 
 TROUBLESHOOTING
 ---------------
-* Get Account ID and License Key
-  * Create an Account on https://www.maxmind.com/en/geoip2-services-and-databases and generate a license key from going to Account icon on top right and "Manage License Keys".
 
 * Update database manually.
   * Run `| maxminddbupdate` search from the `Auto Update MaxMind Database` App.
