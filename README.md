@@ -133,6 +133,9 @@ OPEN SOURCE COMPONENTS AND LICENSES
 
 TROUBLESHOOTING
 ---------------
+* Get Account ID and License Key
+  * Create an Account on https://www.maxmind.com/en/geoip2-services-and-databases and generate a license key from going to Account icon on top right and "Manage License Keys".
+
 * Update database manually.
   * Run `| maxminddbupdate` search from the `Auto Update MaxMind Database` App.
   * In ideal scenario, it should show message `Max Mind Database updated successfully.`.
