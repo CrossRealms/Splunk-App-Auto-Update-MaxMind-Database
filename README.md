@@ -48,11 +48,18 @@ Follow the below-listed steps to install an App from the bundle:
 
 CONFIGURATION
 -------------
-* Open the App and perform the configuration.
-* The complete details about configuration is present on the dashboard directly.
-* See troubleshooting for more details.
+* Get Account ID and License Key
+  * Create an Account on https://www.maxmind.com/en/geoip2-services-and-databases and generate a license key from going to Account icon on top right and "Manage License Keys".
+
+* App Configuration
+  * Open the App and configure Account ID and License Key.
+  * See troubleshooting for more details.
 
 
+DEV
+---
+* App now uses (from App version 3.0.0) same endpoint as [geoipupdate](https://github.com/maxmind/geoipupdate) utility to download the mmdb file.
+  * App uses updates.maxmind.com to download the databases file which supports basic auth. (Prior to 3.0.0, It was using download.maxmind.com)
 
 UNINSTALL APP
 -------------
@@ -70,6 +77,18 @@ KNOWN LIMITATION
 
 RELEASE NOTES
 -------------
+
+Version 3.0.0 (May 2023)
+* Fixed the security issue - Earlier the App was using an API endpoint with exposed LicenseKey in the URL, not it is using a proper authentication mechanism instead.
+* Fixed Splunk Cloud compatibility issue (check_for_secret_disclosure).
+
+Upgrade Guide for version 3.0.0 from previous Version
+* User has to reconfigure the `Account ID` and `License Key` in the MaxMind Database Configuration Page. (Prior to 3.0.0, only License Key was required)
+* Post configuration please execute the validation steps:
+  * Run `| maxminddbupdate` search from the `Auto Update MaxMind Database` App.
+    * In ideal scenario, it should show message `Max Mind Database updated successfully.`
+
+
 Version 2.0.0 (November 2022)
 * Support for distributed environment without installing App on the Indexers.
 * Support for Search head cluster without running the process on the all the search head by replicating the file through lookups folder.
@@ -117,6 +136,7 @@ OPEN SOURCE COMPONENTS AND LICENSES
 
 TROUBLESHOOTING
 ---------------
+
 * Update database manually.
   * Run `| maxminddbupdate` search from the `Auto Update MaxMind Database` App.
   * In ideal scenario, it should show message `Max Mind Database updated successfully.`.

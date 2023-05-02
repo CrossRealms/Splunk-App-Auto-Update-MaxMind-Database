@@ -5,23 +5,43 @@ require([
 ], function ($, mvc) {
 
     function getMaxMindDBConfiguration(){
-        $("#mmdb_configuration_mmdb_license_key").val('******');
-        // password (license key) will not sent to UI
+        let service = mvc.createService();
+        service.get("/MaxMindDBConfiguration", {}, function(error, response){
+            if(response && response.data.entry[0].content && response.data.entry[0].content['maxmind_database_account_id'] != ''){
+                response = response.data.entry[0].content;
+                $("#mmdb_configuration_mmdb_account_id").val(response['maxmind_database_account_id']);
+                $("#mmdb_configuration_mmdb_license_key").val(response['maxmind_database_license_key']);
+            }
+            else if(response && response.data.entry[0].content['error'] && response.data.entry[0].content['error'] != ''){
+                let msg_location = "#mmdb_configuration_mmdb_license_key_msg";
+                $(msg_location).addClass('error_msg');
+                $(msg_location).removeClass('success_msg');
+                $(msg_location).text(`Unable to get Max Mind database configuration, may be there is no configuration. Please set the configuration and save.`);
+            }
+            else if(error && error['error']){
+                console.log(`Error while getting updating Max Mind database configuration: ${error['error']}`);
+            }
+            else{
+                console.log("Unknown error while updating Max Mind database configuration.");
+            }
+        });
     }
     getMaxMindDBConfiguration();
 
 
     function updateMaxMindDBLicenseKey(){
+        let maxmind_database_account_id = $('#mmdb_configuration_mmdb_account_id').val();
         let maxmind_database_license_key = $("#mmdb_configuration_mmdb_license_key").val();
         let msg_location = "#mmdb_configuration_mmdb_license_key_msg";
         if(maxmind_database_license_key === "******"){
             $(msg_location).addClass('error_msg');
             $(msg_location).removeClass('success_msg');
-            $(msg_location).text(`Please re-enter a valid license Key.`);
+            $(msg_location).text(`Please re-enter a valid License Key.`);
             return;
         }
         let service = mvc.createService();
         let data = {
+            "maxmind_database_account_id": maxmind_database_account_id,
             "maxmind_database_license_key": maxmind_database_license_key
         };
         data = JSON.stringify(data);
@@ -29,18 +49,18 @@ require([
             if(response && response.data.entry[0].content['success'] && response.data.entry[0].content['success'] != ''){
                 $(msg_location).removeClass('error_msg');
                 $(msg_location).addClass('success_msg');
-                $(msg_location).text("Max Mind database license key saved successfully.");
+                $(msg_location).text("Max Mind database configuration saved successfully.");
             }
             else if(response && response.data.entry[0].content['error'] && response.data.entry[0].content['error'] != ''){
                 $(msg_location).addClass('error_msg');
                 $(msg_location).removeClass('success_msg');
-                $(msg_location).text(`Unable to save the Max Mind database license key. ${response.data.entry[0].content['error']}`);
+                $(msg_location).text(`Unable to save the Max Mind database configuration. ${response.data.entry[0].content['error']}`);
             }
             else if(error && error['error']){
-                console.log(`Error while getting updating Max Mind database license key: ${error['error']}`);
+                console.log(`Error while getting updating Max Mind database configuration: ${error['error']}`);
             }
             else{
-                console.log("Unknown error while updating Max Mind database license key.");
+                console.log("Unknown error while updating Max Mind database configuration.");
             }
         });
     }

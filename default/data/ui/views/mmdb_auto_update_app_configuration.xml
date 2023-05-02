@@ -7,7 +7,11 @@
         <p id="mmdb_configuration_mmdb_license_key_msg"/>
         <table style="width:60%">
           <tr>
-            <td style="text-align:left">MMDB License Key</td>
+            <td style="text-align:left">Account ID</td>
+            <td style="text-align:left">
+              <input type="text" id="mmdb_configuration_mmdb_account_id" style="margin-bottom:5px;"/>
+            </td>
+            <td style="text-align:left">License Key</td>
             <td style="text-align:left">
               <input type="password" id="mmdb_configuration_mmdb_license_key" style="margin-bottom:5px;"/>
             </td>
