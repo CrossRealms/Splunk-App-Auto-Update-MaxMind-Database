@@ -52,8 +52,7 @@ CONFIGURATION
   * Create an Account on https://www.maxmind.com/en/geoip2-services-and-databases and generate a license key from going to Account icon on top right and "Manage License Keys".
 
 * App Configuration
-  * Open the App and perform the configuration.
-  * The complete details about configuration is present on the dashboard directly.
+  * Open the App and configure Account ID and License Key.
   * See troubleshooting for more details.
 
 
