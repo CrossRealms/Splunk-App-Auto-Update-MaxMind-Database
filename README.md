@@ -55,8 +55,8 @@ CONFIGURATION
 
 DEV
 ---
-* App uses same endpoint as [geoipupdate](https://github.com/maxmind/geoipupdate) utility to download the mmdb file.
-
+* App now uses (from App version 3.0.0) same endpoint as [geoipupdate](https://github.com/maxmind/geoipupdate) utility to download the mmdb file.
+  * App uses updates.maxmind.com to download the databases file which supports basic auth. (Prior to 3.0.0, It was using download.maxmind.com)
 
 UNINSTALL APP
 -------------
@@ -76,8 +76,8 @@ RELEASE NOTES
 -------------
 
 Version 3.0.0 (May 2023)
-* Fixed the `check_for_secret_disclosure` app inspect check to make App Splunk Cloud compatible.
-  * App uses `updates.maxmind.com` to download the databases file which supports basic auth. (Prior to 3.0.0, It was using `download.maxmind.com`)
+* Fixed the security issue - Earlier the App was using an API endpoint with exposed LicenseKey in the URL, not it is using a proper authentication mechanism instead.
+* Fixed Splunk Cloud compatibility issue (check_for_secret_disclosure).
 
 Upgrade Guide for version 3.0.0 from previous Version
 * User has to reconfigure the `Account ID` and `License Key` in the MaxMind Database Configuration Page. (Prior to 3.0.0, only License Key was required)
