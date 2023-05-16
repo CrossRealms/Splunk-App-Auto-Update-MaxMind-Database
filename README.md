@@ -61,6 +61,7 @@ DEV
 * App now uses (from App version 3.0.0) same endpoint as [geoipupdate](https://github.com/maxmind/geoipupdate) utility to download the mmdb file.
   * App uses updates.maxmind.com to download the databases file which supports basic auth. (Prior to 3.0.0, It was using download.maxmind.com)
 
+
 UNINSTALL APP
 -------------
 To uninstall app, user can follow below steps:
@@ -157,4 +158,4 @@ SUPPORT
 * Contact - CrossRealms International Inc.
   * US: +1-312-2784445
 * License Agreement - https://d38o4gzaohghws.cloudfront.net/static/misc/eula.html
-* Copyright - Copyright CrossRealms Internationals, 2022
+* Copyright - Copyright CrossRealms Internationals, 2023
