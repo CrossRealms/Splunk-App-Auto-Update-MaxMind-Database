@@ -285,5 +285,7 @@ class MaxMindDatabaseUtil(object):
             except Exception as e:
                 logger.exception("Unable to perform file operations on MaxMind database file. {}".format(e))
         else:
-            logger.error("Unable to download Max Mind database. status_code={}, Content: {}".format(r.status_code, r.content))
+            err_msg = "Unable to download Max Mind database. status_code={}, Content: {}".format(r.status_code, r.content)
+            logger.error(err_msg)
+            raise Exception(err_msg)
 
