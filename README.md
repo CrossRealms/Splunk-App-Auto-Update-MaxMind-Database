@@ -78,6 +78,10 @@ KNOWN LIMITATION
 
 RELEASE NOTES
 -------------
+Version 3.1.0 (July 2023)
+* Now it MaxMind database updates every day instead of every week.
+* (FYI, actual MaxMind DB updates only once a week or twice a week, but this change will bring the new database quickly.)
+
 
 Version 3.0.0 (May 2023)
 * Fixed the security issue - Earlier the App was using an API endpoint with exposed LicenseKey in the URL, not it is using a proper authentication mechanism instead.
