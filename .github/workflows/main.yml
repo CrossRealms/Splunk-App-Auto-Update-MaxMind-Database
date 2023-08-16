@@ -28,3 +28,5 @@ jobs:
           splunkbase_password: ${{ secrets.SPLUNKBASE_PASSWORD }}
           app_utilities: "whats_in_the_app, logger, splunk_python_sdk"
           my_github_token: ${{ secrets.MY_GITHUB_TOKEN }}
+          logger_log_files_prefix: "auto_update_maxmind_db"
+          logger_sourcetype: "auto_update_maxmind_db:logs"
