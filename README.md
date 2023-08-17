@@ -12,13 +12,20 @@ OVERVIEW
 --------
 The Splunk app auto updates MaxMind database. The database update happens automatically every week. Also, user can update database just by running a search query.
 
-
 * Author - CrossRealms International Inc.
 * Creates Index - False
 * Compatible with:
    * Splunk Enterprise version: 9.0.x
    * OS: Platform independent
    * Browser: Google Chrome, Mozilla Firefox, Safari
+
+
+## What's inside the App
+
+* No of XML Dashboards: **1**
+* Approx Total Viz(Charts/Tables/Map) in XML dashboards: **1**
+* No of Reports and Alerts: **1**
+* No of Custom Commands: **1**
 
 
 
