@@ -17,7 +17,7 @@ jobs:
     runs-on: "ubuntu-latest"
     
     steps:
-      - uses: VatsalJagani/splunk-app-action@v2
+      - uses: VatsalJagani/splunk-app-action@v2.10
         env:
           SPLUNK_APP_ACTION_1: "rm -rf backup_app_icons"
           SPLUNK_APP_ACTION_2: "rm -f .gitignore"
