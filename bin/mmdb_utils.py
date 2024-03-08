@@ -256,7 +256,11 @@ class MaxMindDatabaseUtil(object):
         # NOTE - Please visit GitHub page (https://github.com/VatsalJagani/Splunk-App-Auto-Update-MaxMind-Database), if you are developer and want to help improving this App in anyways
 
         logger.debug("Downloading the MaxMind DB file.")
-        r = requests.get(MaxMindDatabaseDownloadLink, auth=(account_id, license_key), allow_redirects=True, proxies=proxies)
+        try:
+            r = requests.get(MaxMindDatabaseDownloadLink, auth=(account_id, license_key), allow_redirects=True, proxies=proxies)
+        except ConnectionError as connection_error:
+            logger.error("Failed to download DB from %s: %s", MaxMindDatabaseDownloadLink, str(connection_error))
+            raise connection_error
 
         if r.status_code == 200:
             with open(DB_TEMP_DOWNLOAD, 'wb') as fp:
