@@ -85,6 +85,11 @@ KNOWN LIMITATION
 
 RELEASE NOTES
 -------------
+Version 3.1.1 (March 2024)
+* Splunk Python SDK has been updated to the latest version 1.7.4.
+* Minor logging improvement.
+
+
 Version 3.1.0 (July 2023)
 * Now it MaxMind database updates every day instead of every week.
 * (FYI, actual MaxMind DB updates only once a week or twice a week, but this change will bring the new database quickly.)
@@ -168,5 +173,5 @@ SUPPORT
 -------
 * Contact - CrossRealms International Inc.
   * US: +1-312-2784445
-* License Agreement - https://d38o4gzaohghws.cloudfront.net/static/misc/eula.html
-* Copyright - Copyright CrossRealms Internationals, 2023
+* License Agreement - https://cdn.splunkbase.splunk.com/static/misc/eula.html
+* Copyright - Copyright CrossRealms Internationals, 2024
