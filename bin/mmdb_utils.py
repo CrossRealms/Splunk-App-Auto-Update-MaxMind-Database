@@ -258,9 +258,9 @@ class MaxMindDatabaseUtil(object):
         logger.debug("Downloading the MaxMind DB file.")
         try:
             r = requests.get(MaxMindDatabaseDownloadLink, auth=(account_id, license_key), allow_redirects=True, proxies=proxies)
-        except ConnectionError as connection_error:
-            logger.error("Failed to download DB from %s: %s", MaxMindDatabaseDownloadLink, str(connection_error))
-            raise connection_error
+        except Exception as err:
+            logger.exception("Failed to download MaxMind DB file from {}".format(MaxMindDatabaseDownloadLink))
+            raise err
 
         if r.status_code == 200:
             with open(DB_TEMP_DOWNLOAD, 'wb') as fp:
