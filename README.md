@@ -85,6 +85,10 @@ KNOWN LIMITATION
 
 RELEASE NOTES
 -------------
+Version 3.2.0 (March 2024)
+* Updated MaxMind Download URL based on the announcement `We're transitioning to R2 presigned URLs` from MaxMind on `12th of March, 2024`.
+
+
 Version 3.1.1 (March 2024)
 * Splunk Python SDK has been updated to the latest version 1.7.4.
 * Minor logging improvement.

@@ -25,7 +25,7 @@ MAXMIND_LICENSE_KEY_IN_PASSWORD_STORE = 'max_mind_license_key'
 LIMITS_CONF_STANZA = 'iplocation'
 LIMITS_CONF_PARAMETER = 'db_path'
 
-MaxMindDatabaseDownloadLink = 'https://updates.maxmind.com/geoip/databases/GeoLite2-City/update?db_md5=00000000000000000000000000000000'
+MaxMindDatabaseDownloadLink = 'https://download.maxmind.com/geoip/databases/GeoLite2-City/download?suffix=tar.gz'
 
 MMDB_PATH_DIR = 'mmdb'
 MMDB_FILE_NAME = 'GeoLite2-City.mmdb'
