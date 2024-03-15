@@ -301,7 +301,6 @@ class MaxMindDatabaseUtil(object):
                 # remove temp files
                 logger.debug(f"Removing temp directories. {DB_DIR_TEMP_PATH} and {downloaded_dir}")
                 shutil.rmtree(DB_DIR_TEMP_PATH)
-                # shutil.rmtree(downloaded_dir)   # NOTE - Silly me, no need to delete the download_dir which is inside DB_DIR_TEMP_PATH
 
             except Exception as e:
                 logger.exception("Unable to perform file operations on MaxMind database file. {}".format(e))
