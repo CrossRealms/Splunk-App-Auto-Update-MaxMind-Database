@@ -1,7 +1,7 @@
 import os
 import json
 import requests
-import gzip
+import tarfile
 import shutil
 from six.moves.urllib.parse import quote
 
@@ -25,7 +25,7 @@ MAXMIND_LICENSE_KEY_IN_PASSWORD_STORE = 'max_mind_license_key'
 LIMITS_CONF_STANZA = 'iplocation'
 LIMITS_CONF_PARAMETER = 'db_path'
 
-MaxMindDatabaseDownloadLink = 'https://updates.maxmind.com/geoip/databases/GeoLite2-City/update?db_md5=00000000000000000000000000000000'
+MaxMindDatabaseDownloadLink = 'https://download.maxmind.com/geoip/databases/GeoLite2-City/download?suffix=tar.gz'
 
 MMDB_PATH_DIR = 'mmdb'
 MMDB_FILE_NAME = 'GeoLite2-City.mmdb'
@@ -264,19 +264,34 @@ class MaxMindDatabaseUtil(object):
 
         if r.status_code == 200:
             with open(DB_TEMP_DOWNLOAD, 'wb') as fp:
-                fp.write(r.content)
+                for chunk in r.iter_content(1024):
+                    fp.write(chunk)
 
-            downloaded_file = os.path.join(DB_DIR_TEMP_PATH, 'GeoLite2-City.mmdb')
             try:
-                # Extract the downloaded file
-                with gzip.open(DB_TEMP_DOWNLOAD, 'rb') as s_file, open(downloaded_file, 'wb') as d_file:
-                    shutil.copyfileobj(s_file, d_file, 65536)
-            except Exception as e:
+            # Extract the downloaded file
+                with tarfile.open(DB_TEMP_DOWNLOAD, "r:gz") as tar:
+                    tar.extractall(DB_DIR_TEMP_PATH)
+            except tarfile.ReadError as e:
                 msg = "Unable to extract downloaded MaxMind database. {}".format(e)
                 logger.exception(msg)
                 raise e
 
-            logger.debug("Downloaded MaxMind DB file: {}".format(downloaded_file))
+            logger.debug("Downloaded and extracted MaxMind DB folder: {}".format(DB_DIR_TEMP_PATH))
+
+            # Find untared folder
+            downloaded_dir = None
+            for filedir in os.listdir(DB_DIR_TEMP_PATH):
+                if filedir.startswith("GeoLite2-City_"):
+                    downloaded_dir = os.path.join(DB_DIR_TEMP_PATH, filedir)
+                    break
+
+            # Find downloaded file
+            downloaded_file = None
+            for filedir in os.listdir(downloaded_dir):
+                if filedir.startswith("GeoLite2-City"):
+                    downloaded_file = os.path.join(downloaded_dir, filedir)
+                    logger.info("Downloaded MaxMind DB file: {}".format(downloaded_file))
+                    break
 
             try:
                 # Move extracted file to lookup_tmp location with updated file name
@@ -284,6 +299,7 @@ class MaxMindDatabaseUtil(object):
                 logger.debug("MaxMind DB file added: {}".format(LOOKUP_FILE_LOCATION))
 
                 # remove temp files
+                logger.debug(f"Removing temp directories. {DB_DIR_TEMP_PATH} and {downloaded_dir}")
                 shutil.rmtree(DB_DIR_TEMP_PATH)
 
             except Exception as e:
