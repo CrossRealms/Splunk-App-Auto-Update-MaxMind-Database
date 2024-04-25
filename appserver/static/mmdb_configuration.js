@@ -31,6 +31,9 @@ require([
 
 
     function updateMaxMindDBLicenseKey(){
+        let msg_location = "#mmdb_configuration_mmdb_license_key_msg";
+        $(msg_location).text(` `);
+
         let maxmind_database_account_id = $('#mmdb_configuration_mmdb_account_id').val();
         let maxmind_database_license_key = $("#mmdb_configuration_mmdb_license_key").val();
 
@@ -39,7 +42,6 @@ require([
             mmdb_config_proxy_url = "None";
         }
 
-        let msg_location = "#mmdb_configuration_mmdb_license_key_msg";
         if(maxmind_database_license_key === "******"){
             $(msg_location).addClass('error_msg');
             $(msg_location).removeClass('success_msg');
