@@ -21,6 +21,7 @@ MMDB_CONF_FILE = 'mmdb_configuration'
 MMDB_CONF_STANZA = 'mmdb'
 
 MAXMIND_LICENSE_KEY_IN_PASSWORD_STORE = 'max_mind_license_key'
+MAXMIND_PROXY_URL_IN_PASSWORD_STORE = 'max_mind_proxy_url'
 
 LIMITS_CONF_STANZA = 'iplocation'
 LIMITS_CONF_PARAMETER = 'db_path'
@@ -65,7 +66,7 @@ class CredentialManager(object):
         :param username: Username used to search credentials.
         :return: username, password
         '''
-        logger.info("Getting the stored license-key from passwords.conf")
+        logger.info("Getting the stored credential from passwords.conf. Username={}".format(username))
         # list all credentials
         entities = entity.getEntities(["admin", "passwords"], search=APP_NAME, count=-1, namespace=APP_NAME, owner="nobody",
                                     sessionKey=self.session_key)
@@ -138,12 +139,26 @@ class MaxMindDatabaseUtil(object):
         # Read MaxMind license key
         license_key = self.get_max_mind_license_key()
         if not license_key:
-            msg = "Max Mind license key not found in password store. Please update config from Max Mind database configuration page.."
+            msg = "Max Mind license key not found in password store. Please update config from Max Mind database configuration page."
             logger.error(msg)
             raise Exception(msg)
 
+        # Read MaxMind license key
+        proxy_url = None
+        try:
+            proxy_url = self.get_max_mind_proxy_url()
+        except Exception as e:
+            logger.info("Exception in getting proxy_url. {}".format(e))
+
+        if not proxy_url or proxy_url == '******' or proxy_url.lower() == 'none':
+            proxy_url = None
+            msg = "Max Mind proxy_url not found in password store. Using no proxy."
+            logger.info(msg)
+        else:
+            logger.info("Using proxy_url provided by the user.")
+
         # Download mmdb database in a appropriate directory
-        self.download_mmdb_database(account_id, license_key)
+        self.download_mmdb_database(account_id, license_key, proxy_url)
 
         flag = self.is_lookup_present()
         logger.debug("is_lookup_present = {}".format(flag))
@@ -175,6 +190,10 @@ class MaxMindDatabaseUtil(object):
 
     def get_max_mind_license_key(self):
         return CredentialManager(self.session_key).get_credential(MAXMIND_LICENSE_KEY_IN_PASSWORD_STORE)
+
+
+    def get_max_mind_proxy_url(self):
+        return CredentialManager(self.session_key).get_credential(MAXMIND_PROXY_URL_IN_PASSWORD_STORE)
 
 
     def get_mmdb_location(self):
@@ -241,19 +260,22 @@ class MaxMindDatabaseUtil(object):
                 method='POST', raiseAllErrors=True)
 
 
-    def download_mmdb_database(self, account_id, license_key):
-        # NOTE - Proxy Configuration
-        # Remove '<username>:<password>@' part if using proxy without authentication (just use ip:port format)
-        # Understand the risk of storing password in plain-text when using proxy with authentication
+    def download_mmdb_database(self, account_id, license_key, proxy_url):
         proxies = None
-        '''
-        proxies = {
-            "http" : "<proxy-supported-schema http|https>://<username>:<password>@<ip-address>:<port>",
-            "https" : "<proxy-supported-schema http|https>://<username>:<password>@<ip-address>:<port>"
-        }
-        '''
+        if proxy_url:
+            if proxy_url.startswith("https"):
+                proxies = {
+                    "https" : proxy_url
+                }
+            elif proxy_url.startswith("http"):
+                proxies = {
+                    "http" : proxy_url
+                }
+            else:
+                msg = "This App only supports http/https proxy not any other proxy type."
+                logger.error(msg)
+                raise Exception(msg)
 
-        # NOTE - Please visit GitHub page (https://github.com/VatsalJagani/Splunk-App-Auto-Update-MaxMind-Database), if you are developer and want to help improving this App in anyways
 
         logger.debug("Downloading the MaxMind DB file.")
         try:

@@ -5,22 +5,47 @@
     <panel>
       <html>
         <p id="mmdb_configuration_mmdb_license_key_msg"/>
-        <table style="width:60%">
+        <table style="width:50%">
           <tr>
             <td style="text-align:left">Account ID</td>
             <td style="text-align:left">
               <input type="text" id="mmdb_configuration_mmdb_account_id" style="margin-bottom:5px;"/>
             </td>
+          </tr>
+          <tr>
             <td style="text-align:left">License Key</td>
             <td style="text-align:left">
               <input type="password" id="mmdb_configuration_mmdb_license_key" style="margin-bottom:5px;"/>
             </td>
+          </tr>
+          <tr>
+            <td><p></p></td>
+          </tr>
+          <tr>
+            <td style="text-align:left">Proxy Full URL</td>
+            <td style="text-align:left">
+              <input type="text" id="mmdb_config_proxy_url" style="margin-bottom:5px;"/>
+            </td>
+          </tr>
+          <tr>
+            <td>Proxy URL format</td>
+            <td>http|https://[username]:[password]@[proxy-ip-host]:[port]</td>
+          </tr>
+          <tr>
+            <td><p></p></td>
+            <td><p></p></td>
+          </tr>
+          <tr>
             <td style="text-align:left">
               <button id="mmdb_configuration_mmdb_license_key_button">Save</button>
             </td>
           </tr>
+          <tr>
+            <td><p></p></td>
+            <td><p></p></td>
+          </tr>
         </table>
-        <p>Create an Account on https://www.maxmind.com/en/geoip2-services-and-databases and generate a license key from going to Account icon on top right and "Manage License Keys".</p>
+        <p>Create an Account on <b>https://www.maxmind.com/en/geoip2-services-and-databases</b> and generate a license key from going to Account icon on top right and "Manage License Keys".</p>
       </html>
       <html>
         <div>

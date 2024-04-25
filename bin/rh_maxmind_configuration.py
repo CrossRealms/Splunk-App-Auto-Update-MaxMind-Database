@@ -47,12 +47,21 @@ class MaxMindDBConfRestcall(admin.MConfigHandler):
 
             account_id = ''
             license_key = '******'
+            mmdb_config_proxy_url = 'None'
+
+            try:
+                mmdb_config_proxy_url = mmdb_utils.CredentialManager(self.getSessionKey())\
+                    .get_credential(mmdb_utils.MAXMIND_PROXY_URL_IN_PASSWORD_STORE)
+            except:
+                pass
+
             for i in data:
                 if i['name'] == mmdb_utils.MMDB_CONF_STANZA:
                     account_id = i['content']['account_id']
                     break
             conf_info['action']['maxmind_database_account_id'] = account_id
             conf_info['action']['maxmind_database_license_key'] = license_key
+            conf_info['action']['mmdb_config_proxy_url'] = mmdb_config_proxy_url
         except Exception as e:
             conf_info['action']['error'] = 'Unable to fetch the Account ID. {}'.format(e)    
 
@@ -63,6 +72,7 @@ class MaxMindDBConfRestcall(admin.MConfigHandler):
             data = json.loads(self.callerArgs['data'][0])
             maxmind_account_id = str(data['maxmind_database_account_id'])
             maxmind_license_key = str(data['maxmind_database_license_key'])
+            mmdb_config_proxy_url = str(data['mmdb_config_proxy_url'])
         except Exception as e:
             conf_info['action']['error'] = 'Data is not in proper format. {} - {}'.format(e, self.callerArgs["data"])
             return
@@ -73,6 +83,10 @@ class MaxMindDBConfRestcall(admin.MConfigHandler):
 
             # Store License Key
             mmdb_utils.CredentialManager(self.getSessionKey()).store_credential(mmdb_utils.MAXMIND_LICENSE_KEY_IN_PASSWORD_STORE, maxmind_license_key)
+
+            # Store Proxy URL
+            if mmdb_config_proxy_url != '******':
+                mmdb_utils.CredentialManager(self.getSessionKey()).store_credential(mmdb_utils.MAXMIND_PROXY_URL_IN_PASSWORD_STORE, mmdb_config_proxy_url)
 
             self.app_configured()
 
