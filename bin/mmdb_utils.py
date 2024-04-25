@@ -1,4 +1,15 @@
 import os
+import sys
+
+# import lib modules
+sys.path.insert(
+    os.path.join(
+        os.path.dirname(__file__),
+        os.path.pardir,
+        'lib'
+    )
+)
+
 import json
 import requests
 import tarfile
