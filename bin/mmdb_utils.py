@@ -299,7 +299,7 @@ class MaxMindDatabaseUtil(object):
                 logger.debug("MaxMind DB file added: {}".format(LOOKUP_FILE_LOCATION))
 
                 # remove temp files
-                logger.debug(f"Removing temp directories. {DB_DIR_TEMP_PATH} and {downloaded_dir}")
+                logger.debug("Removing temp directories. {} and {}".format(DB_DIR_TEMP_PATH,downloaded_dir))
                 shutil.rmtree(DB_DIR_TEMP_PATH)
 
             except Exception as e:
