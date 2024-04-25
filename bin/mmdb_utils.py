@@ -271,8 +271,13 @@ class MaxMindDatabaseUtil(object):
                 proxies = {
                     "http" : proxy_url
                 }
+            elif proxy_url.startswith("socks4") or proxy_url.startswith("socks5"):
+                proxies = {
+                    "http" : proxy_url,
+                    "https" : proxy_url
+                }
             else:
-                msg = "This App only supports http/https proxy not any other proxy type."
+                msg = "This App only supports http/https/socks4/socks5 proxy not any other proxy type."
                 logger.error(msg)
                 raise Exception(msg)
 

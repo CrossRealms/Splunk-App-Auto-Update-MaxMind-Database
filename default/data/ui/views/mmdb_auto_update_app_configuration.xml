@@ -29,7 +29,7 @@
           </tr>
           <tr>
             <td>Proxy URL format</td>
-            <td>http|https://[username]:[password]@[proxy-ip-host]:[port]</td>
+            <td>[ http | https | socks4 | socks5 ]://[username]:[password]@[proxy-ip-host]:[port]</td>
           </tr>
           <tr>
             <td><p></p></td>
