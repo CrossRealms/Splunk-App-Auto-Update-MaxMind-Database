@@ -22,6 +22,7 @@ jobs:
           SPLUNK_APP_ACTION_1: "rm -rf backup_app_icons"
           SPLUNK_APP_ACTION_2: "rm -f .gitignore"
           SPLUNK_APP_ACTION_3: "rm -rf Note_*"
+          SPLUNK_APP_ACTION_4: "rm -rf images"
         with:
           app_dir: "."
           to_make_permission_changes: true
