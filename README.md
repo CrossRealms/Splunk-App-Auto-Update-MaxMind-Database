@@ -63,12 +63,6 @@ CONFIGURATION
   * See troubleshooting for more details.
 
 
-DEV
----
-* App now uses (from App version 3.0.0) same endpoint as [geoipupdate](https://github.com/maxmind/geoipupdate) utility to download the mmdb file.
-  * App uses updates.maxmind.com to download the databases file which supports basic auth. (Prior to 3.0.0, It was using download.maxmind.com)
-
-
 UNINSTALL APP
 -------------
 To uninstall app, user can follow below steps:
