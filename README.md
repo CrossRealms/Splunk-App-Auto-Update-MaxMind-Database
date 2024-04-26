@@ -56,7 +56,7 @@ Follow the below-listed steps to install an App from the bundle:
 CONFIGURATION
 -------------
 * Get Account ID and License Key
-  * Create an Account on https://www.maxmind.com/en/geoip2-services-and-databases and generate a license key from going to Account icon on top right and "Manage License Keys". (For more details, refer **How to generate new License Key for free** section)
+  * Create an Account on https://www.maxmind.com/en/geoip2-services-and-databases and generate a license key from going to Account icon on top right and "Manage License Keys". (For more details, refer [HOW TO GENERATE NEW LICENSE KEY FOR FREE](https://github.com/CrossRealms/Splunk-App-Auto-Update-MaxMind-Database/tree/Add-steps-to-generate-license-key?tab=readme-ov-file#how-to-generate-new-license-key-for-free) section)
 
 * App Configuration
   * Open the App and configure Account ID and License Key.
@@ -66,11 +66,11 @@ CONFIGURATION
 HOW TO GENERATE NEW LICENSE KEY FOR FREE
 ----------------------------------------
   * Create free account on https://www.maxmind.com/en/geolite2/signup?utm_source=kb&utm_medium=kb-link&utm_campaign=kb-create-account
-    ![alt]({{ site.baseurl }}/images/license_key_generation_1.png)
+    ![alt](https://github.com/CrossRealms/Splunk-App-Auto-Update-MaxMind-Database/blob/Add-steps-to-generate-license-key/images/license_key_generation_1.png)
   * Generate a license key from going to Account icon on top right and "Manage License Keys"
-    ![alt]({{ site.baseurl }}/images/license_key_generation_2.png)
+    ![alt](https://github.com/CrossRealms/Splunk-App-Auto-Update-MaxMind-Database/blob/Add-steps-to-generate-license-key/images/license_key_generation_2.png)
   * Copy the AccountID from this page and Click on the "Generate new license key" and copy it.
-    ![alt]({{ site.baseurl }}/images/license_key_generation_2.png)
+    ![alt](https://github.com/CrossRealms/Splunk-App-Auto-Update-MaxMind-Database/blob/Add-steps-to-generate-license-key/images/license_key_generation_3.png)
 
 
 DEV
