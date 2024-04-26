@@ -66,11 +66,11 @@ CONFIGURATION
 HOW TO GENERATE NEW LICENSE KEY FOR FREE
 ----------------------------------------
   * Create free account on https://www.maxmind.com/en/geolite2/signup?utm_source=kb&utm_medium=kb-link&utm_campaign=kb-create-account
-    ![alt](https://github.com/CrossRealms/Splunk-App-Auto-Update-MaxMind-Database/blob/Add-steps-to-generate-license-key/images/license_key_generation_1.png)
+    ![alt](https://github.com/CrossRealms/Splunk-App-Auto-Update-MaxMind-Database/blob/master/images/license_key_generation_1.png)
   * Generate a license key from going to Account icon on top right and "Manage License Keys"
-    ![alt](https://github.com/CrossRealms/Splunk-App-Auto-Update-MaxMind-Database/blob/Add-steps-to-generate-license-key/images/license_key_generation_2.png)
+    ![alt](https://github.com/CrossRealms/Splunk-App-Auto-Update-MaxMind-Database/blob/master/images/license_key_generation_2.png)
   * Copy the AccountID from this page and Click on the "Generate new license key" and copy it.
-    ![alt](https://github.com/CrossRealms/Splunk-App-Auto-Update-MaxMind-Database/blob/Add-steps-to-generate-license-key/images/license_key_generation_3.png)
+    ![alt](https://github.com/CrossRealms/Splunk-App-Auto-Update-MaxMind-Database/blob/master/images/license_key_generation_3.png)
 
 
 DEV
