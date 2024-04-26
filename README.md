@@ -79,6 +79,11 @@ KNOWN LIMITATION
 
 RELEASE NOTES
 -------------
+Version 4.0.0 (April 2024)
+* Added support for Proxy from UI.
+* Fixed issue with code command not working with default python version in certain customer Splunk environments.
+
+
 Version 3.2.0 (March 2024)
 * Updated MaxMind Download URL based on the announcement `We're transitioning to R2 presigned URLs` from MaxMind on `12th of March, 2024`.
 
