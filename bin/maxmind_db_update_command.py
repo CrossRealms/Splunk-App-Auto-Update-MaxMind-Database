@@ -1,4 +1,14 @@
+import os
 import sys
+
+# import lib modules
+sys.path.insert(
+    os.path.join(
+        os.path.dirname(__file__),
+        os.path.pardir,
+        'lib'
+    )
+)
 
 from splunklib.searchcommands import dispatch, GeneratingCommand, Configuration
 import mmdb_utils
