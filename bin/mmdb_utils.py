@@ -166,8 +166,13 @@ class MaxMindDatabaseUtil(object):
             logger.info("Using proxy_url provided by the user.")
 
         # SSL certificate validation
-        is_ssl_verify = convert_to_bool_default_true(mmdb_config['is_ssl_verify'])
-        logger.info("Max Mind is_ssl_verify={}".format(is_ssl_verify))
+        ssl_verify = convert_to_bool_default_true(mmdb_config['is_ssl_verify'])
+
+        _custom_cert_path = os.path.join(os.path.dirname(__file__), "custom_cert.pem")
+        if os.path.isfile(_custom_cert_path):
+            ssl_verify = _custom_cert_path
+
+        logger.info("Max Mind ssl_verify={}".format(ssl_verify))
 
         # Download mmdb database in a appropriate directory
         self.download_mmdb_database(mmdb_config['account_id'], license_key, proxy_url, True)
@@ -271,7 +276,7 @@ class MaxMindDatabaseUtil(object):
                 method='POST', raiseAllErrors=True)
 
 
-    def download_mmdb_database(self, account_id, license_key, proxy_url=None, is_ssl_verify=True):
+    def download_mmdb_database(self, account_id, license_key, proxy_url=None, ssl_verify=True):
         proxies = None
         if proxy_url:
             if proxy_url.startswith("https") or proxy_url.startswith("http") or \
@@ -288,7 +293,7 @@ class MaxMindDatabaseUtil(object):
 
         logger.debug("Downloading the MaxMind DB file.")
         try:
-            r = requests.get(MaxMindDatabaseDownloadLink, auth=(account_id, license_key), allow_redirects=True, proxies=proxies, verify=is_ssl_verify)
+            r = requests.get(MaxMindDatabaseDownloadLink, auth=(account_id, license_key), allow_redirects=True, proxies=proxies, verify=ssl_verify)
         except Exception as err:
             logger.exception("Failed to download MaxMind DB file from {}".format(MaxMindDatabaseDownloadLink))
             raise err

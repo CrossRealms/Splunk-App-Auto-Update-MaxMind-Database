@@ -60,13 +60,18 @@ CONFIGURATION
 
 * App Configuration
   * Open the App and configure Account ID and License Key.
-  * Optionally you can configure:
-    * Proxy URL from UI
+  * Optionally you can configure Proxy URL from UI:
       * if your Splunk instance cannot reach the internet directly, you can use proxy url as well.
       * Proxy URL will be stored in encrypted format, so you don't have to worry if in case your proxy URL contains proxy username and password.
+
+  * Advanced Guide:
+    * Provide custom certificate file:
+      * Create a new file called `custom_cert.pem` with the content as public certificate you need inside the `bin` directory of the App.
     * Disable ssl validation
       * Only disable ssl validation in case it is absolutely needed.
       * Update the local version of `mmdb_configuration.conf` file and add `is_ssl_verify = false` parameter under `mmdb` stanza. And restart the Splunk service.
+      * Note: if you have created `custom_cert.pem` inside the `bin` folder, this parameter will be ignored.
+
   * See troubleshooting for more details.
 
 
