@@ -175,7 +175,7 @@ class MaxMindDatabaseUtil(object):
         logger.info("Max Mind ssl_verify={}".format(ssl_verify))
 
         # Download mmdb database in a appropriate directory
-        self.download_mmdb_database(mmdb_config['account_id'], license_key, proxy_url, True)
+        self.download_mmdb_database(mmdb_config['account_id'], license_key, proxy_url, ssl_verify)
 
         flag = self.is_lookup_present()
         logger.debug("is_lookup_present = {}".format(flag))
