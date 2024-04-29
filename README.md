@@ -106,6 +106,7 @@ Version 4.0.0 (May 2024)
 * Added support for Proxy from UI.
 * Fixed issue with code command not working with default python version in certain customer Splunk environments.
 * Provided support to explicitly disable SSL cert validation from mmdb_configuration.conf file. (Caution: User is not recommend to disable the cert validation unless it is absolutely necessary.)
+* Splunk-python-sdk updated to the latest version.
 
 
 Version 3.3.0 (April 2024)
