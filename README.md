@@ -66,7 +66,7 @@ CONFIGURATION
       * Proxy URL will be stored in encrypted format, so you don't have to worry if in case your proxy URL contains proxy username and password.
     * Disable ssl validation
       * Only disable ssl validation in case it is absolutely needed.
-      * Update the local version of `mmdb_configuration.conf` file and add `is_ssl_verify = false` parameter under `mmdb` stanza.
+      * Update the local version of `mmdb_configuration.conf` file and add `is_ssl_verify = false` parameter under `mmdb` stanza. And restart the Splunk service.
   * See troubleshooting for more details.
 
 
