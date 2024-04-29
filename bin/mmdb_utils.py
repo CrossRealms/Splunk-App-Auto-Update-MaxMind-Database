@@ -51,9 +51,6 @@ APP_LOCAL_LIMITS_CONF_PATH = os.path.join(APP_LOCAL_PATH, 'limits.conf')
 
 
 def convert_to_bool_default_true(val):
-    if not val:
-        return True
-
     _val = str(val).lower()
     if _val in ["false", "f", "0"]:
         return False
@@ -277,15 +274,8 @@ class MaxMindDatabaseUtil(object):
     def download_mmdb_database(self, account_id, license_key, proxy_url=None, is_ssl_verify=True):
         proxies = None
         if proxy_url:
-            if proxy_url.startswith("https"):
-                proxies = {
-                    "https" : proxy_url
-                }
-            elif proxy_url.startswith("http"):
-                proxies = {
-                    "http" : proxy_url
-                }
-            elif proxy_url.startswith("socks4") or proxy_url.startswith("socks5"):
+            if proxy_url.startswith("https") or proxy_url.startswith("http") or \
+                proxy_url.startswith("socks4") or proxy_url.startswith("socks5"):
                 proxies = {
                     "http" : proxy_url,
                     "https" : proxy_url
