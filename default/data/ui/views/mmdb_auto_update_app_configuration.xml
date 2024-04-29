@@ -58,7 +58,8 @@
             <td><p></p></td>
           </tr>
         </table>
-        <p>Create an Account on <b>https://www.maxmind.com/en/geoip2-services-and-databases</b> and generate a license key from going to Account icon on top right and "Manage License Keys".</p>
+        <br/>
+        <p>Create an Account on <a target="_blank" href="https://www.maxmind.com/en/geoip2-services-and-databases">MaxMind</a> and generate a license key from going to Account icon on top right and "Manage License Keys". (For more details, refer <a target="_blank" href="https://github.com/CrossRealms/Splunk-App-Auto-Update-MaxMind-Database/tree/Add-steps-to-generate-license-key?tab=readme-ov-file#how-to-generate-new-license-key-for-free">HOW TO GENERATE NEW LICENSE KEY FOR FREE</a> section)</p>
       </html>
       <html>
         <div>
