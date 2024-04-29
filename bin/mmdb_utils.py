@@ -60,6 +60,15 @@ APP_LOCAL_LIMITS_CONF_PATH = os.path.join(APP_LOCAL_PATH, 'limits.conf')
 
 
 
+def convert_to_bool_default_true(val):
+    if not val:
+        return True
+
+    _val = str(val).lower()
+    if _val in ["false", "f", "0"]:
+        return False
+    return True
+
 
 class CredentialManager(object):
     '''
@@ -142,8 +151,8 @@ class MaxMindDatabaseUtil(object):
         if not os.path.exists(LOOKUP_DIR_LOCATION):
             os.makedirs(LOOKUP_DIR_LOCATION)
 
-        account_id = self.get_max_mind_account_id()
-        if not account_id:
+        mmdb_config = self.get_max_mind_config()
+        if not mmdb_config:
             msg = "Max Mind Account key not found. Please update config from Max Mind database configuration page."
             logger.error(msg)
             raise Exception(msg)
@@ -169,8 +178,12 @@ class MaxMindDatabaseUtil(object):
         else:
             logger.info("Using proxy_url provided by the user.")
 
+        # SSL certificate validation
+        is_ssl_verify = convert_to_bool_default_true(mmdb_config['is_ssl_verify'])
+        logger.info("Max Mind is_ssl_verify={}".format(is_ssl_verify))
+
         # Download mmdb database in a appropriate directory
-        self.download_mmdb_database(account_id, license_key, proxy_url)
+        self.download_mmdb_database(mmdb_config['account_id'], license_key, proxy_url, is_ssl_verify)
 
         flag = self.is_lookup_present()
         logger.debug("is_lookup_present = {}".format(flag))
@@ -188,16 +201,15 @@ class MaxMindDatabaseUtil(object):
         logger.info("MaxMind Database file updated successfully.")
 
 
-    def get_max_mind_account_id(self):
+    def get_max_mind_config(self):
         _, serverContent = rest.simpleRequest("/servicesNS/nobody/{}/configs/conf-{}/{}?output_mode=json".format(APP_NAME, MMDB_CONF_FILE, MMDB_CONF_STANZA), sessionKey=self.session_key)
         data = json.loads(serverContent)['entry']
 
-        account_id = ''
         for i in data:
             if i['name'] == MMDB_CONF_STANZA:
-                account_id = i['content']['account_id']
-                break
-        return account_id
+                return i['content']
+
+        return None
 
 
     def get_max_mind_license_key(self):
@@ -272,7 +284,7 @@ class MaxMindDatabaseUtil(object):
                 method='POST', raiseAllErrors=True)
 
 
-    def download_mmdb_database(self, account_id, license_key, proxy_url):
+    def download_mmdb_database(self, account_id, license_key, proxy_url, is_ssl_verify):
         proxies = None
         if proxy_url:
             if proxy_url.startswith("https"):
@@ -296,7 +308,7 @@ class MaxMindDatabaseUtil(object):
 
         logger.debug("Downloading the MaxMind DB file.")
         try:
-            r = requests.get(MaxMindDatabaseDownloadLink, auth=(account_id, license_key), allow_redirects=True, proxies=proxies)
+            r = requests.get(MaxMindDatabaseDownloadLink, auth=(account_id, license_key), allow_redirects=True, proxies=proxies, verify=is_ssl_verify)
         except Exception as err:
             logger.exception("Failed to download MaxMind DB file from {}".format(MaxMindDatabaseDownloadLink))
             raise err

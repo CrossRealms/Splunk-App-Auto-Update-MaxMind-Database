@@ -33,6 +33,19 @@
           </tr>
           <tr>
             <td><p></p></td>
+          </tr>
+          <tr>
+            <td style="text-align:left">Is SSL Cert Validation</td>
+            <td style="text-align:left">
+              <input type="checkbox" id="mmdb_config_is_ssl_verify" style="margin-bottom:5px;"/>
+            </td>
+          </tr>
+          <tr>
+            <td>Caution</td>
+            <td>Do not disable SSL cert validation unless it is absolute necessary.</td>
+          </tr>
+          <tr>
+            <td><p></p></td>
             <td><p></p></td>
           </tr>
           <tr>
