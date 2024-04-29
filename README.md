@@ -79,10 +79,14 @@ KNOWN LIMITATION
 
 RELEASE NOTES
 -------------
-Version 4.0.0 (April 2024)
+Version 4.0.0 (May 2024)
 * Added support for Proxy from UI.
 * Fixed issue with code command not working with default python version in certain customer Splunk environments.
 * Provided support to explicitly disable SSL cert validation. (Caution: User is not recommend to disable the cert validation unless it is absolutely necessary.)
+
+
+Version 3.3.0 (April 2024)
+* Only a patch release. See the release notes under version 4.0.0.
 
 
 Version 3.2.0 (March 2024)
