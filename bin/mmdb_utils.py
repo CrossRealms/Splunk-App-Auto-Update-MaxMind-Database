@@ -179,11 +179,11 @@ class MaxMindDatabaseUtil(object):
             logger.info("Using proxy_url provided by the user.")
 
         # SSL certificate validation
-        is_ssl_verify = convert_to_bool_default_true(mmdb_config['is_ssl_verify'])
-        logger.info("Max Mind is_ssl_verify={}".format(is_ssl_verify))
+        # is_ssl_verify = convert_to_bool_default_true(mmdb_config['is_ssl_verify'])
+        # logger.info("Max Mind is_ssl_verify={}".format(is_ssl_verify))
 
         # Download mmdb database in a appropriate directory
-        self.download_mmdb_database(mmdb_config['account_id'], license_key, proxy_url, is_ssl_verify)
+        self.download_mmdb_database(mmdb_config['account_id'], license_key, proxy_url, True)
 
         flag = self.is_lookup_present()
         logger.debug("is_lookup_present = {}".format(flag))
@@ -284,7 +284,7 @@ class MaxMindDatabaseUtil(object):
                 method='POST', raiseAllErrors=True)
 
 
-    def download_mmdb_database(self, account_id, license_key, proxy_url, is_ssl_verify):
+    def download_mmdb_database(self, account_id, license_key, proxy_url=None, is_ssl_verify=True):
         proxies = None
         if proxy_url:
             if proxy_url.startswith("https"):

@@ -60,6 +60,12 @@ CONFIGURATION
 
 * App Configuration
   * Open the App and configure Account ID and License Key.
+  * Optionally you can configure:
+    * Proxy URL from UI
+      * if your Splunk instance cannot reach the internet directly, you can use proxy url as well.
+    * Disable ssl validation
+      * Only disable ssl validation in case it is absolutely needed.
+      * Update the local version of `mmdb_configuration.conf` file and add `is_ssl_verify = false` parameter under `mmdb` stanza.
   * See troubleshooting for more details.
 
 
@@ -82,7 +88,7 @@ RELEASE NOTES
 Version 4.0.0 (May 2024)
 * Added support for Proxy from UI.
 * Fixed issue with code command not working with default python version in certain customer Splunk environments.
-* Provided support to explicitly disable SSL cert validation. (Caution: User is not recommend to disable the cert validation unless it is absolutely necessary.)
+* Provided support to explicitly disable SSL cert validation from mmdb_configuration.conf file. (Caution: User is not recommend to disable the cert validation unless it is absolutely necessary.)
 
 
 Version 3.3.0 (April 2024)

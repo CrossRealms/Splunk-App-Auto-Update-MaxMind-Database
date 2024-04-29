@@ -48,7 +48,7 @@ class MaxMindDBConfRestcall(admin.MConfigHandler):
             account_id = ''
             license_key = '******'
             mmdb_config_proxy_url = 'None'
-            is_ssl_verify = True
+            # is_ssl_verify = True
 
             try:
                 mmdb_config_proxy_url = mmdb_utils.CredentialManager(self.getSessionKey())\
@@ -59,12 +59,12 @@ class MaxMindDBConfRestcall(admin.MConfigHandler):
             for i in data:
                 if i['name'] == mmdb_utils.MMDB_CONF_STANZA:
                     account_id = i['content']['account_id']
-                    is_ssl_verify = i['content']['is_ssl_verify']
+                    # is_ssl_verify = i['content']['is_ssl_verify']
                     break
             conf_info['action']['maxmind_database_account_id'] = account_id
             conf_info['action']['maxmind_database_license_key'] = license_key
             conf_info['action']['mmdb_config_proxy_url'] = mmdb_config_proxy_url
-            conf_info['action']['mmdb_config_is_ssl_verify'] = is_ssl_verify
+            # conf_info['action']['mmdb_config_is_ssl_verify'] = is_ssl_verify
         except Exception as e:
             conf_info['action']['error'] = 'Unable to fetch the Account ID. {}'.format(e)    
 
@@ -76,14 +76,18 @@ class MaxMindDBConfRestcall(admin.MConfigHandler):
             maxmind_account_id = str(data['maxmind_database_account_id'])
             maxmind_license_key = str(data['maxmind_database_license_key'])
             mmdb_config_proxy_url = str(data['mmdb_config_proxy_url'])
-            mmdb_config_is_ssl_verify = data['mmdb_config_is_ssl_verify']
+            # mmdb_config_is_ssl_verify = data['mmdb_config_is_ssl_verify']
         except Exception as e:
             conf_info['action']['error'] = 'Data is not in proper format. {} - {}'.format(e, self.callerArgs["data"])
             return
 
         try:
             # Store Account ID
-            rest.simpleRequest("/servicesNS/nobody/{}/configs/conf-{}/{}?output_mode=json".format(mmdb_utils.APP_NAME, mmdb_utils.MMDB_CONF_FILE, mmdb_utils.MMDB_CONF_STANZA), postargs={'account_id': maxmind_account_id, 'is_ssl_verify': mmdb_config_is_ssl_verify}, method='POST', sessionKey=self.getSessionKey())
+            rest.simpleRequest("/servicesNS/nobody/{}/configs/conf-{}/{}?output_mode=json".format(mmdb_utils.APP_NAME, mmdb_utils.MMDB_CONF_FILE, mmdb_utils.MMDB_CONF_STANZA),
+                               postargs={'account_id': maxmind_account_id},   # , 'is_ssl_verify': mmdb_config_is_ssl_verify},
+                               method='POST',
+                               sessionKey=self.getSessionKey()
+                            )
 
             # Store License Key
             mmdb_utils.CredentialManager(self.getSessionKey()).store_credential(mmdb_utils.MAXMIND_LICENSE_KEY_IN_PASSWORD_STORE, maxmind_license_key)
