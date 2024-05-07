@@ -14,7 +14,7 @@ from splunk import rest
 
 import logging
 import logger_manager
-logger = logger_manager.setup_logging('log', logging.DEBUG)
+logger = logger_manager.setup_logging('mmdb_util', logging.DEBUG)
 
 
 APP_NAME = 'splunk_maxmind_db_auto_update'
