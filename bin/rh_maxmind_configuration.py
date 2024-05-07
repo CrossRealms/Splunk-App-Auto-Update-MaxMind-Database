@@ -1,6 +1,5 @@
 import json
 import splunk.admin as admin
-import splunk.bundle as bundle
 import splunk.rest as rest
 import mmdb_utils
 
