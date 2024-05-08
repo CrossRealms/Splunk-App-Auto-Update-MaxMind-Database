@@ -91,7 +91,7 @@ UNINSTALL APP
 To uninstall app, user can follow below steps:
 * SSH to the Splunk instance
 * Go to folder apps($SPLUNK_HOME/etc/apps)
-* Remove the `splunk_maxmind_db_auto_update` folder from apps directory
+* Remove the `splunk_maxmind_db_auto_update_fix` folder from apps directory
 * Restart Splunk
 
 

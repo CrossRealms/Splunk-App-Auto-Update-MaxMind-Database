@@ -4,7 +4,7 @@
     "title": "Auto Update MaxMind Database",
     "id": {
       "group": null,
-      "name": "splunk_maxmind_db_auto_update",
+      "name": "splunk_maxmind_db_auto_update_fix",
       "version": "3.3.1"
     },
     "author": [

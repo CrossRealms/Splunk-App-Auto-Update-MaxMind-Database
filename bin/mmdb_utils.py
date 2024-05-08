@@ -17,7 +17,7 @@ import logger_manager
 logger = logger_manager.setup_logging('mmdb_util', logging.DEBUG)
 
 
-APP_NAME = 'splunk_maxmind_db_auto_update'
+APP_NAME = 'splunk_maxmind_db_auto_update_fix'
 
 MMDB_CONF_FILE = 'mmdb_configuration'
 MMDB_CONF_STANZA = 'mmdb'
