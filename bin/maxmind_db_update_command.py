@@ -16,7 +16,7 @@ class UpdateMaxMindDatabase(GeneratingCommand):
             yield {"Message": "Max Mind Database updated successfully."}
 
         except Exception as e:
-            yield {"Message": "{}".format(e)}
+            yield {"Message": f"{e}"}
 
 
 dispatch(UpdateMaxMindDatabase, sys.argv, sys.stdin, sys.stdout, __name__)

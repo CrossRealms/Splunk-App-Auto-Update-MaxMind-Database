@@ -33,15 +33,15 @@ class MaxMindDBConfRestcall(admin.MConfigHandler):
             logger.info("Configuring app.conf is_configured.")
             # set is_configure=true in app.conf
             rest.simpleRequest(
-                '/servicesNS/nobody/{}/configs/conf-app/install'.format(mmdb_utils.APP_NAME),
+                f'/servicesNS/nobody/{mmdb_utils.APP_NAME}/configs/conf-app/install',
                 sessionKey=sessionKey,
                 getargs={'output_mode':'json'},
                 postargs={"is_configured": "true"},
                 method='POST', raiseAllErrors=True)
 
-            rest.simpleRequest("/apps/local/{}/_reload".format(mmdb_utils.APP_NAME), sessionKey=sessionKey)
+            rest.simpleRequest(f"/apps/local/{mmdb_utils.APP_NAME}/_reload", sessionKey=sessionKey)
         except Exception as e:
-            err_msg = 'Unable to set is_configured parameter in local app.conf file. {}'.format(e)
+            err_msg = f'Unable to set is_configured parameter in local app.conf file. {e}'
             logger.error(err_msg)
             raise Exception(err_msg)
 
@@ -51,7 +51,7 @@ class MaxMindDBConfRestcall(admin.MConfigHandler):
         try:
             logger.info("MaxMind Account details GET request.")
 
-            _, serverContent = rest.simpleRequest("/servicesNS/nobody/{}/configs/conf-{}/{}?output_mode=json".format(mmdb_utils.APP_NAME, mmdb_utils.MMDB_CONF_FILE, mmdb_utils.MMDB_CONF_STANZA), sessionKey=self.getSessionKey())
+            _, serverContent = rest.simpleRequest(f"/servicesNS/nobody/{mmdb_utils.APP_NAME}/configs/conf-{mmdb_utils.MMDB_CONF_FILE}/{mmdb_utils.MMDB_CONF_STANZA}?output_mode=json", sessionKey=self.getSessionKey())
             data = json.loads(serverContent)['entry']
 
             account_id = ''
@@ -76,7 +76,7 @@ class MaxMindDBConfRestcall(admin.MConfigHandler):
             conf_info['action']['mmdb_config_proxy_url'] = mmdb_config_proxy_url
             # conf_info['action']['mmdb_config_is_ssl_verify'] = is_ssl_verify
         except Exception as e:
-            err_msg = 'Unable to fetch the Account ID. {}'.format(e)
+            err_msg = f'Unable to fetch the Account ID. {e}'
             logger.exception(err_msg)
             conf_info['action']['error'] = err_msg
 
@@ -92,7 +92,7 @@ class MaxMindDBConfRestcall(admin.MConfigHandler):
             mmdb_config_proxy_url = str(data['mmdb_config_proxy_url'])
             # mmdb_config_is_ssl_verify = data['mmdb_config_is_ssl_verify']
         except Exception as e:
-            err_msg = 'Data is not in proper format. {}'.format(e)
+            err_msg = f'Data is not in proper format. {e}'
             logger.error(err_msg)
             conf_info['action']['error'] = err_msg
             return
@@ -100,7 +100,7 @@ class MaxMindDBConfRestcall(admin.MConfigHandler):
         try:
             logger.info("Storing the Account ID.")
             # Store Account ID
-            rest.simpleRequest("/servicesNS/nobody/{}/configs/conf-{}/{}?output_mode=json".format(mmdb_utils.APP_NAME, mmdb_utils.MMDB_CONF_FILE, mmdb_utils.MMDB_CONF_STANZA),
+            rest.simpleRequest(f"/servicesNS/nobody/{mmdb_utils.APP_NAME}/configs/conf-{mmdb_utils.MMDB_CONF_FILE}/{mmdb_utils.MMDB_CONF_STANZA}?output_mode=json",
                                postargs={'account_id': maxmind_account_id},   # , 'is_ssl_verify': mmdb_config_is_ssl_verify},
                                method='POST',
                                sessionKey=self.getSessionKey()
@@ -122,7 +122,7 @@ class MaxMindDBConfRestcall(admin.MConfigHandler):
             conf_info['action']['success'] = success_msg
 
         except Exception as e:
-            err_msg = 'Error while storing license key. {}'.format(e)
+            err_msg = f'Error while storing license key. {e}'
             logger.exception(err_msg)
             conf_info['action']['error'] = err_msg
 
