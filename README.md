@@ -109,7 +109,7 @@ Version 4.0.0 (May 2024)
 * Splunk-python-sdk updated to the latest version.
 
 
-Version 3.3.1 (April 2024)
+Version 3.3.1 / Version 3.3.2 (April/May 2024)
 * Only a patch release. See the release notes under version 4.0.0.
 
 
