@@ -103,9 +103,10 @@ KNOWN LIMITATION
 RELEASE NOTES
 -------------
 Version 4.0.0 (May 2024)
-* Added support for Proxy from UI.
-* Fixed issue with code command not working with default python version in certain customer Splunk environments.
-* Provided support to explicitly disable SSL cert validation from mmdb_configuration.conf file. (Caution: User is not recommend to disable the cert validation unless it is absolutely necessary.)
+* Added support for `Proxy` from UI.
+* Fixed issue when App run in Splunk environment with Python2 as default.
+    * Syntax error with code - "Error in 'maxminddbupdate' command: External search command exited unexpectedly with non-zero error code 1."
+* Provided support to explicitly disable `SSL cert` validation from mmdb_configuration.conf file. (Caution: User is not recommend to disable the cert validation unless it is absolutely necessary.)
 * Splunk-python-sdk updated to the latest version.
 
 
