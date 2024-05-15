@@ -151,7 +151,7 @@ class MaxMindDatabaseUtil(object):
             logger.error(msg)
             raise Exception(msg)
 
-        # Read MaxMind license key
+        # Read Proxy URL
         proxy_url = None
         try:
             proxy_url = self.get_max_mind_proxy_url()
