@@ -156,7 +156,7 @@ class MaxMindDatabaseUtil(object):
         try:
             proxy_url = self.get_max_mind_proxy_url()
         except Exception as e:
-            logger.info(f"Exception in getting proxy_url. {f}")
+            logger.info(f"Exception in getting proxy_url. {e}")
 
         if not proxy_url or proxy_url == '******' or proxy_url.lower() == 'none':
             proxy_url = None
