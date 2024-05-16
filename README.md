@@ -60,6 +60,18 @@ CONFIGURATION
 
 * App Configuration
   * Open the App and configure Account ID and License Key.
+  * Optionally you can configure Proxy URL from UI:
+      * if your Splunk instance cannot reach the internet directly, you can use proxy url as well.
+      * Proxy URL will be stored in encrypted format, so you don't have to worry if in case your proxy URL contains proxy username and password.
+
+  * Advanced Guide:
+    * Provide custom certificate file:
+      * Create a new file called `custom_cert.pem` with the content as public certificate you need inside the `bin` directory of the App.
+    * Disable ssl validation
+      * Only disable ssl validation in case it is absolutely needed.
+      * Update the local version of `mmdb_configuration.conf` file and add `is_ssl_verify = false` parameter under `mmdb` stanza. And restart the Splunk service.
+      * Note: if you have created `custom_cert.pem` inside the `bin` folder, this parameter will be ignored.
+
   * See troubleshooting for more details.
 
 
@@ -72,11 +84,6 @@ HOW TO GENERATE NEW LICENSE KEY FOR FREE
   * Copy the AccountID from this page and Click on the "Generate new license key" and copy it.
     ![alt](https://github.com/CrossRealms/Splunk-App-Auto-Update-MaxMind-Database/blob/master/images/license_key_generation_3.png)
 
-
-DEV
----
-* App now uses (from App version 3.0.0) same endpoint as [geoipupdate](https://github.com/maxmind/geoipupdate) utility to download the mmdb file.
-  * App uses updates.maxmind.com to download the databases file which supports basic auth. (Prior to 3.0.0, It was using download.maxmind.com)
 
 
 UNINSTALL APP
@@ -95,6 +102,18 @@ KNOWN LIMITATION
 
 RELEASE NOTES
 -------------
+Version 4.0.0 (May 2024)
+* Added support for `Proxy` from UI.
+* Fixed issue when App run in Splunk environment with Python2 as default.
+    * Syntax error with code - "Error in 'maxminddbupdate' command: External search command exited unexpectedly with non-zero error code 1."
+* Provided support to explicitly disable `SSL cert` validation from mmdb_configuration.conf file. (Caution: User is not recommend to disable the cert validation unless it is absolutely necessary.)
+* Splunk-python-sdk updated to the latest version.
+
+
+Version 3.3.1 / Version 3.3.2 (April/May 2024)
+* Only a patch release. See the release notes under version 4.0.0.
+
+
 Version 3.2.0 (March 2024)
 * Updated MaxMind Download URL based on the announcement `We're transitioning to R2 presigned URLs` from MaxMind on `12th of March, 2024`.
 

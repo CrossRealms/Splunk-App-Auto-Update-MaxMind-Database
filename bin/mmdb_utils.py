@@ -1,3 +1,5 @@
+import import_lib
+
 import os
 import json
 import requests
@@ -12,7 +14,7 @@ from splunk import rest
 
 import logging
 import logger_manager
-logger = logger_manager.setup_logging('log', logging.DEBUG)
+logger = logger_manager.setup_logging('mmdb_util', logging.DEBUG)
 
 
 APP_NAME = 'splunk_maxmind_db_auto_update'
@@ -21,6 +23,7 @@ MMDB_CONF_FILE = 'mmdb_configuration'
 MMDB_CONF_STANZA = 'mmdb'
 
 MAXMIND_LICENSE_KEY_IN_PASSWORD_STORE = 'max_mind_license_key'
+MAXMIND_PROXY_URL_IN_PASSWORD_STORE = 'max_mind_proxy_url'
 
 LIMITS_CONF_STANZA = 'iplocation'
 LIMITS_CONF_PARAMETER = 'db_path'
@@ -47,6 +50,36 @@ APP_LOCAL_LIMITS_CONF_PATH = os.path.join(APP_LOCAL_PATH, 'limits.conf')
 
 
 
+def convert_to_bool_default_true(val):
+    _val = str(val).lower()
+    if _val in ["false", "f", "0"]:
+        return False
+    return True
+
+
+def encode_username_password_in_proxy_url(proxy_url):
+    _split_scheme = proxy_url.split("://")
+    scheme = _split_scheme[0]
+    rest_of_proxy_url = "://".join(_split_scheme[1:])
+
+    username = None
+    password = None
+    if ":" in rest_of_proxy_url and "@" in rest_of_proxy_url:
+        _split_username = rest_of_proxy_url.split(":")
+        username = _split_username[0]
+        rest_of_proxy_url = ":".join(_split_username[1:])
+
+        _split_password = rest_of_proxy_url.split("@")
+        password = "@".join(_split_password[:-1])
+        rest_of_proxy_url = _split_password[-1]
+
+    if username and password:
+        encoded_username = quote(username, safe='')
+        encoded_password = quote(password, safe='')
+        return f"{scheme}://{encoded_username}:{encoded_password}@{rest_of_proxy_url}"
+    else:
+        return f"{scheme}://{rest_of_proxy_url}"
+
 
 class CredentialManager(object):
     '''
@@ -65,7 +98,7 @@ class CredentialManager(object):
         :param username: Username used to search credentials.
         :return: username, password
         '''
-        logger.info("Getting the stored license-key from passwords.conf")
+        logger.info(f"Getting the stored credential from passwords.conf. Username={username}")
         # list all credentials
         entities = entity.getEntities(["admin", "passwords"], search=APP_NAME, count=-1, namespace=APP_NAME, owner="nobody",
                                     sessionKey=self.session_key)
@@ -98,7 +131,7 @@ class CredentialManager(object):
             realm = quote(APP_NAME + ":" + username + ":", safe='')
 
             rest.simpleRequest(
-                "/servicesNS/nobody/{}/storage/passwords/{}?output_mode=json".format(APP_NAME, realm),
+                f"/servicesNS/nobody/{APP_NAME}/storage/passwords/{realm}?output_mode=json",
                 self.session_key, postargs=postargs, method='POST', raiseAllErrors=True)
 
             return True
@@ -109,7 +142,7 @@ class CredentialManager(object):
                 "password": json.dumps(password) if isinstance(password, dict) else password,
                 "realm": APP_NAME
             }
-            rest.simpleRequest("/servicesNS/nobody/{}/storage/passwords/?output_mode=json".format(APP_NAME),
+            rest.simpleRequest("/servicesNS/nobody/{APP_NAME}/storage/passwords/?output_mode=json",
                                     self.session_key, postargs=postargs, method='POST', raiseAllErrors=True)
 
 
@@ -129,8 +162,8 @@ class MaxMindDatabaseUtil(object):
         if not os.path.exists(LOOKUP_DIR_LOCATION):
             os.makedirs(LOOKUP_DIR_LOCATION)
 
-        account_id = self.get_max_mind_account_id()
-        if not account_id:
+        mmdb_config = self.get_max_mind_config()
+        if not mmdb_config:
             msg = "Max Mind Account key not found. Please update config from Max Mind database configuration page."
             logger.error(msg)
             raise Exception(msg)
@@ -138,15 +171,50 @@ class MaxMindDatabaseUtil(object):
         # Read MaxMind license key
         license_key = self.get_max_mind_license_key()
         if not license_key:
-            msg = "Max Mind license key not found in password store. Please update config from Max Mind database configuration page.."
+            msg = "Max Mind license key not found in password store. Please update config from Max Mind database configuration page."
             logger.error(msg)
             raise Exception(msg)
 
+        # Read Proxy URL
+        proxy_url = None
+        try:
+            proxy_url = self.get_max_mind_proxy_url()
+        except Exception as e:
+            logger.info(f"Exception in getting proxy_url. {e}")
+
+        if not proxy_url or proxy_url == '******' or proxy_url.lower() == 'none':
+            proxy_url = None
+            msg = "Max Mind proxy_url not found in password store. Using no proxy."
+            logger.info(msg)
+        else:
+            if proxy_url.startswith("https") or proxy_url.startswith("http") or \
+                proxy_url.startswith("socks4") or proxy_url.startswith("socks5"):
+                try:
+                    proxy_url = encode_username_password_in_proxy_url(proxy_url)
+                    logger.info("Using proxy_url provided by the user.")
+                except Exception as e:
+                    msg = "Unable to encode username and password in the proxy URL properly."
+                    logger.error(msg + f" {e}")
+                    raise Exception(msg)
+            else:
+                msg = "This App only supports http/https/socks4/socks5 proxy not any other proxy type."
+                logger.error(msg)
+                raise Exception(msg)
+
+        # SSL certificate validation
+        ssl_verify = convert_to_bool_default_true(mmdb_config['is_ssl_verify'])
+
+        _custom_cert_path = os.path.join(os.path.dirname(__file__), "custom_cert.pem")
+        if os.path.isfile(_custom_cert_path):
+            ssl_verify = _custom_cert_path
+
+        logger.info(f"Max Mind ssl_verify={ssl_verify}")
+
         # Download mmdb database in a appropriate directory
-        self.download_mmdb_database(account_id, license_key)
+        self.download_mmdb_database(mmdb_config['account_id'], license_key, proxy_url, ssl_verify)
 
         flag = self.is_lookup_present()
-        logger.debug("is_lookup_present = {}".format(flag))
+        logger.debug(f"is_lookup_present = {flag}")
 
         if flag:
             logger.debug("Updating the lookup")
@@ -161,26 +229,29 @@ class MaxMindDatabaseUtil(object):
         logger.info("MaxMind Database file updated successfully.")
 
 
-    def get_max_mind_account_id(self):
-        _, serverContent = rest.simpleRequest("/servicesNS/nobody/{}/configs/conf-{}/{}?output_mode=json".format(APP_NAME, MMDB_CONF_FILE, MMDB_CONF_STANZA), sessionKey=self.session_key)
+    def get_max_mind_config(self):
+        _, serverContent = rest.simpleRequest(f"/servicesNS/nobody/{APP_NAME}/configs/conf-{MMDB_CONF_FILE}/{MMDB_CONF_STANZA}?output_mode=json", sessionKey=self.session_key)
         data = json.loads(serverContent)['entry']
 
-        account_id = ''
         for i in data:
             if i['name'] == MMDB_CONF_STANZA:
-                account_id = i['content']['account_id']
-                break
-        return account_id
+                return i['content']
+
+        return None
 
 
     def get_max_mind_license_key(self):
         return CredentialManager(self.session_key).get_credential(MAXMIND_LICENSE_KEY_IN_PASSWORD_STORE)
 
 
+    def get_max_mind_proxy_url(self):
+        return CredentialManager(self.session_key).get_credential(MAXMIND_PROXY_URL_IN_PASSWORD_STORE)
+
+
     def get_mmdb_location(self):
         current_location = '/opt/splunk/share/'
 
-        endpoint = '/servicesNS/nobody/{}/configs/conf-{}'.format(APP_NAME, 'limits')
+        endpoint = f'/servicesNS/nobody/{APP_NAME}/configs/conf-limits'
         response_status, response_content = rest.simpleRequest(endpoint,
                 sessionKey=self.session_key, getargs={'output_mode':'json', 'count': '0'}, raiseAllErrors=True)
         data = json.loads(response_content)['entry']
@@ -194,11 +265,11 @@ class MaxMindDatabaseUtil(object):
     def cleanup_old_version_limits_conf(self):
         if os.path.exists(APP_LOCAL_LIMITS_CONF_PATH):
             current_location = self.get_mmdb_location()
-            logger.debug("dbpath value from iplocation stanza = {}".format(current_location))
+            logger.debug(f"dbpath value from iplocation stanza = {current_location}")
             if current_location == OLD_DB_PATH:
                 # set empty value in dbpath
                 rest.simpleRequest(
-                    '/servicesNS/nobody/{}/configs/conf-{}/{}'.format(APP_NAME, 'limits', LIMITS_CONF_STANZA),
+                    f'/servicesNS/nobody/{APP_NAME}/configs/conf-limits/{LIMITS_CONF_STANZA}',
                     sessionKey=self.session_key,
                     getargs={'output_mode':'json'},
                     postargs={LIMITS_CONF_PARAMETER: ''},
@@ -241,25 +312,19 @@ class MaxMindDatabaseUtil(object):
                 method='POST', raiseAllErrors=True)
 
 
-    def download_mmdb_database(self, account_id, license_key):
-        # NOTE - Proxy Configuration
-        # Remove '<username>:<password>@' part if using proxy without authentication (just use ip:port format)
-        # Understand the risk of storing password in plain-text when using proxy with authentication
+    def download_mmdb_database(self, account_id, license_key, proxy_url=None, ssl_verify=True):
         proxies = None
-        '''
-        proxies = {
-            "http" : "<proxy-supported-schema http|https>://<username>:<password>@<ip-address>:<port>",
-            "https" : "<proxy-supported-schema http|https>://<username>:<password>@<ip-address>:<port>"
-        }
-        '''
-
-        # NOTE - Please visit GitHub page (https://github.com/VatsalJagani/Splunk-App-Auto-Update-MaxMind-Database), if you are developer and want to help improving this App in anyways
+        if proxy_url:
+            proxies = {
+                "http" : proxy_url,
+                "https" : proxy_url
+            }
 
         logger.debug("Downloading the MaxMind DB file.")
         try:
-            r = requests.get(MaxMindDatabaseDownloadLink, auth=(account_id, license_key), allow_redirects=True, proxies=proxies)
+            r = requests.get(MaxMindDatabaseDownloadLink, auth=(account_id, license_key), allow_redirects=True, proxies=proxies, verify=ssl_verify)
         except Exception as err:
-            logger.exception("Failed to download MaxMind DB file from {}".format(MaxMindDatabaseDownloadLink))
+            logger.exception(f"Failed to download MaxMind DB file from {MaxMindDatabaseDownloadLink}")
             raise err
 
         if r.status_code == 200:
@@ -272,11 +337,11 @@ class MaxMindDatabaseUtil(object):
                 with tarfile.open(DB_TEMP_DOWNLOAD, "r:gz") as tar:
                     tar.extractall(DB_DIR_TEMP_PATH)
             except tarfile.ReadError as e:
-                msg = "Unable to extract downloaded MaxMind database. {}".format(e)
+                msg = f"Unable to extract downloaded MaxMind database. {e}"
                 logger.exception(msg)
                 raise e
 
-            logger.debug("Downloaded and extracted MaxMind DB folder: {}".format(DB_DIR_TEMP_PATH))
+            logger.debug(f"Downloaded and extracted MaxMind DB folder: {DB_DIR_TEMP_PATH}")
 
             # Find untared folder
             downloaded_dir = None
@@ -290,22 +355,22 @@ class MaxMindDatabaseUtil(object):
             for filedir in os.listdir(downloaded_dir):
                 if filedir.startswith("GeoLite2-City"):
                     downloaded_file = os.path.join(downloaded_dir, filedir)
-                    logger.info("Downloaded MaxMind DB file: {}".format(downloaded_file))
+                    logger.info(f"Downloaded MaxMind DB file: {downloaded_file}")
                     break
 
             try:
                 # Move extracted file to lookup_tmp location with updated file name
                 shutil.move(downloaded_file, LOOKUP_FILE_LOCATION)
-                logger.debug("MaxMind DB file added: {}".format(LOOKUP_FILE_LOCATION))
+                logger.debug(f"MaxMind DB file added: {LOOKUP_FILE_LOCATION}")
 
-                # remove temp files
+                # Remove temp files
                 logger.debug(f"Removing temp directories. {DB_DIR_TEMP_PATH} and {downloaded_dir}")
                 shutil.rmtree(DB_DIR_TEMP_PATH)
 
             except Exception as e:
-                logger.exception("Unable to perform file operations on MaxMind database file. {}".format(e))
+                logger.exception(f"Unable to perform file operations on MaxMind database file. {e}")
         else:
-            err_msg = "Unable to download Max Mind database. status_code={}, Content: {}".format(r.status_code, r.content)
+            err_msg = f"Unable to download Max Mind database. status_code={r.status_code}, Content: {r.content}"
             logger.error(err_msg)
             raise Exception(err_msg)
 

@@ -17,7 +17,7 @@ jobs:
     runs-on: "ubuntu-latest"
     
     steps:
-      - uses: VatsalJagani/splunk-app-action@v4
+      - uses: VatsalJagani/splunk-app-action@v4.1
         env:
           SPLUNK_APP_ACTION_1: "rm -rf backup_app_icons"
           SPLUNK_APP_ACTION_2: "rm -f .gitignore"
@@ -32,3 +32,4 @@ jobs:
           my_github_token: ${{ secrets.MY_GITHUB_TOKEN }}
           logger_log_files_prefix: "auto_update_maxmind_db"
           logger_sourcetype: "auto_update_maxmind_db:logs"
+          splunk_python_sdk_install_path: "lib"

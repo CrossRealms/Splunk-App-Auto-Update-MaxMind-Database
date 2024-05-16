@@ -11,6 +11,8 @@ require([
                 response = response.data.entry[0].content;
                 $("#mmdb_configuration_mmdb_account_id").val(response['maxmind_database_account_id']);
                 $("#mmdb_configuration_mmdb_license_key").val(response['maxmind_database_license_key']);
+                $("#mmdb_config_proxy_url").val(response['mmdb_config_proxy_url']);
+                // $("#mmdb_config_is_ssl_verify").prop('checked', response['mmdb_config_is_ssl_verify']);
             }
             else if(response && response.data.entry[0].content['error'] && response.data.entry[0].content['error'] != ''){
                 let msg_location = "#mmdb_configuration_mmdb_license_key_msg";
@@ -30,9 +32,19 @@ require([
 
 
     function updateMaxMindDBLicenseKey(){
+        let msg_location = "#mmdb_configuration_mmdb_license_key_msg";
+        $(msg_location).text(` `);
+
         let maxmind_database_account_id = $('#mmdb_configuration_mmdb_account_id').val();
         let maxmind_database_license_key = $("#mmdb_configuration_mmdb_license_key").val();
-        let msg_location = "#mmdb_configuration_mmdb_license_key_msg";
+
+        let mmdb_config_proxy_url = $("#mmdb_config_proxy_url").val();
+        if (mmdb_config_proxy_url.trim() == ""){
+            mmdb_config_proxy_url = "None";
+        }
+
+        // let mmdb_config_is_ssl_verify = $("#mmdb_config_is_ssl_verify").is(":checked");
+
         if(maxmind_database_license_key === "******"){
             $(msg_location).addClass('error_msg');
             $(msg_location).removeClass('success_msg');
@@ -42,7 +54,9 @@ require([
         let service = mvc.createService();
         let data = {
             "maxmind_database_account_id": maxmind_database_account_id,
-            "maxmind_database_license_key": maxmind_database_license_key
+            "maxmind_database_license_key": maxmind_database_license_key,
+            "mmdb_config_proxy_url": mmdb_config_proxy_url
+            // "mmdb_config_is_ssl_verify": mmdb_config_is_ssl_verify
         };
         data = JSON.stringify(data);
         service.post("/MaxMindDBConfiguration/configuration", {"data": data}, function(error, response){
