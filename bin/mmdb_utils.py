@@ -5,7 +5,7 @@ import json
 import requests
 import tarfile
 import shutil
-from six.moves.urllib.parse import quote
+from six.moves.urllib.parse import quote, urlparse, urlunparse
 
 import splunk.entity as entity
 import splunk.appserver.mrsparkle.lib.util as splunk_lib_util
@@ -55,6 +55,26 @@ def convert_to_bool_default_true(val):
     if _val in ["false", "f", "0"]:
         return False
     return True
+
+
+def encode_username_password_in_proxy_url(proxy_url):
+    parsed_url = urlparse(proxy_url)
+
+    username = parsed_url.username
+    encoded_username = None
+    password = parsed_url.password
+    encoded_password = None
+    if username and password:
+        encoded_username = quote(username, safe='')
+        encoded_password = quote(password, safe='')
+        netloc = f"{encoded_username}:{encoded_password}@{parsed_url.hostname}"
+    else:
+        netloc = f"{parsed_url.hostname}"
+
+    if parsed_url.port:
+        netloc += f":{parsed_url.port}"
+    new_url = urlunparse((parsed_url.scheme, netloc, parsed_url.path, parsed_url.params, parsed_url.query, parsed_url.fragment))
+    return new_url
 
 
 class CredentialManager(object):
@@ -282,8 +302,8 @@ class MaxMindDatabaseUtil(object):
             if proxy_url.startswith("https") or proxy_url.startswith("http") or \
                 proxy_url.startswith("socks4") or proxy_url.startswith("socks5"):
                 proxies = {
-                    "http" : proxy_url,
-                    "https" : proxy_url
+                    "http" : encode_username_password_in_proxy_url(proxy_url),
+                    "https" : encode_username_password_in_proxy_url(proxy_url)
                 }
             else:
                 msg = "This App only supports http/https/socks4/socks5 proxy not any other proxy type."
