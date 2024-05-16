@@ -5,7 +5,7 @@ import json
 import requests
 import tarfile
 import shutil
-from six.moves.urllib.parse import quote, urlparse, urlunparse
+from six.moves.urllib.parse import quote
 
 import splunk.entity as entity
 import splunk.appserver.mrsparkle.lib.util as splunk_lib_util
@@ -58,23 +58,27 @@ def convert_to_bool_default_true(val):
 
 
 def encode_username_password_in_proxy_url(proxy_url):
-    parsed_url = urlparse(proxy_url)
+    _split_scheme = proxy_url.split("://")
+    scheme = _split_scheme[0]
+    rest_of_proxy_url = "://".join(_split_scheme[1:])
 
-    username = parsed_url.username
-    encoded_username = None
-    password = parsed_url.password
-    encoded_password = None
+    username = None
+    password = None
+    if ":" in rest_of_proxy_url and "@" in rest_of_proxy_url:
+        _split_username = rest_of_proxy_url.split(":")
+        username = _split_username[0]
+        rest_of_proxy_url = ":".join(_split_username[1:])
+
+        _split_password = rest_of_proxy_url.split("@")
+        password = "@".join(_split_password[:-1])
+        rest_of_proxy_url = _split_password[-1]
+
     if username and password:
         encoded_username = quote(username, safe='')
         encoded_password = quote(password, safe='')
-        netloc = f"{encoded_username}:{encoded_password}@{parsed_url.hostname}"
+        return f"{scheme}://{encoded_username}:{encoded_password}@{rest_of_proxy_url}"
     else:
-        netloc = f"{parsed_url.hostname}"
-
-    if parsed_url.port:
-        netloc += f":{parsed_url.port}"
-    new_url = urlunparse((parsed_url.scheme, netloc, parsed_url.path, parsed_url.params, parsed_url.query, parsed_url.fragment))
-    return new_url
+        return f"{scheme}://{rest_of_proxy_url}"
 
 
 class CredentialManager(object):
