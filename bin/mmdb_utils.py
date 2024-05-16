@@ -142,7 +142,7 @@ class CredentialManager(object):
                 "password": json.dumps(password) if isinstance(password, dict) else password,
                 "realm": APP_NAME
             }
-            rest.simpleRequest("/servicesNS/nobody/{APP_NAME}/storage/passwords/?output_mode=json",
+            rest.simpleRequest(f"/servicesNS/nobody/{APP_NAME}/storage/passwords/?output_mode=json",
                                     self.session_key, postargs=postargs, method='POST', raiseAllErrors=True)
 
 
