@@ -183,7 +183,19 @@ class MaxMindDatabaseUtil(object):
             msg = "Max Mind proxy_url not found in password store. Using no proxy."
             logger.info(msg)
         else:
-            logger.info("Using proxy_url provided by the user.")
+            if proxy_url.startswith("https") or proxy_url.startswith("http") or \
+                proxy_url.startswith("socks4") or proxy_url.startswith("socks5"):
+                try:
+                    proxy_url = encode_username_password_in_proxy_url(proxy_url)
+                    logger.info("Using proxy_url provided by the user.")
+                except Exception as e:
+                    msg = "Unable to encode username and password in the proxy URL properly."
+                    logger.error(msg + f" {e}")
+                    raise Exception(msg)
+            else:
+                msg = "This App only supports http/https/socks4/socks5 proxy not any other proxy type."
+                logger.error(msg)
+                raise Exception(msg)
 
         # SSL certificate validation
         ssl_verify = convert_to_bool_default_true(mmdb_config['is_ssl_verify'])
@@ -299,17 +311,10 @@ class MaxMindDatabaseUtil(object):
     def download_mmdb_database(self, account_id, license_key, proxy_url=None, ssl_verify=True):
         proxies = None
         if proxy_url:
-            if proxy_url.startswith("https") or proxy_url.startswith("http") or \
-                proxy_url.startswith("socks4") or proxy_url.startswith("socks5"):
-                proxies = {
-                    "http" : encode_username_password_in_proxy_url(proxy_url),
-                    "https" : encode_username_password_in_proxy_url(proxy_url)
-                }
-            else:
-                msg = "This App only supports http/https/socks4/socks5 proxy not any other proxy type."
-                logger.error(msg)
-                raise Exception(msg)
-
+            proxies = {
+                "http" : proxy_url,
+                "https" : proxy_url
+            }
 
         logger.debug("Downloading the MaxMind DB file.")
         try:
