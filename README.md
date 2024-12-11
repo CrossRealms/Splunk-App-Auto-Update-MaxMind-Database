@@ -102,6 +102,9 @@ KNOWN LIMITATION
 
 RELEASE NOTES
 -------------
+Version 4.0.1 (December 2024)
+* Splunk-python-sdk updated to the latest version.
+
 Version 4.0.0 (May 2024)
 * Added support for `Proxy` from UI.
 * Fixed issue when App run in Splunk environment with Python2 as default.
