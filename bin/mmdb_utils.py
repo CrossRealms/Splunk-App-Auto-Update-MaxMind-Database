@@ -168,6 +168,11 @@ class MaxMindDatabaseUtil(object):
             logger.error(msg)
             raise Exception(msg)
 
+        if mmdb_config['maxmind_database_file'] not in ["GeoLite2", "GeoIP2"]:
+            msg = f"Invalid database file: {mmdb_config['maxmind_database_file']}. Supported database files are 'GeoLite2' and 'GeoIP2'."
+            logger.error(msg)
+            raise Exception(msg)
+
         # Read MaxMind license key
         license_key = self.get_max_mind_license_key()
         if not license_key:

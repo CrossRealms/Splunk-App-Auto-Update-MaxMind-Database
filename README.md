@@ -60,7 +60,7 @@ CONFIGURATION
 
 * App Configuration
   * Open the App and configure Account ID and License Key.
-  * Select Database File you want to update (GeoLite2 or GeoIP2). default:GeoLite2.
+  * Select Database File you want to update (GeoLite2 (free tier) or GeoIP2 (paid tier)). default:GeoLite2.
   * Optionally you can configure Proxy URL from UI:
       * if your Splunk instance cannot reach the internet directly, you can use proxy url as well.
       * Proxy URL will be stored in encrypted format, so you don't have to worry if in case your proxy URL contains proxy username and password.
