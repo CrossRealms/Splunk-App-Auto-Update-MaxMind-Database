@@ -28,7 +28,7 @@ MAXMIND_PROXY_URL_IN_PASSWORD_STORE = 'max_mind_proxy_url'
 LIMITS_CONF_STANZA = 'iplocation'
 LIMITS_CONF_PARAMETER = 'db_path'
 
-MaxMindDatabaseDownloadLink = 'https://download.maxmind.com/geoip/databases/GeoLite2-City/download?suffix=tar.gz'
+MaxMindDatabaseDownloadLink = 'https://download.maxmind.com/geoip/databases/{}-City/download?suffix=tar.gz'
 
 MMDB_PATH_DIR = 'mmdb'
 MMDB_FILE_NAME = 'GeoLite2-City.mmdb'
@@ -211,7 +211,7 @@ class MaxMindDatabaseUtil(object):
         logger.info(f"Max Mind ssl_verify={ssl_verify}")
 
         # Download mmdb database in a appropriate directory
-        self.download_mmdb_database(mmdb_config['account_id'], license_key, proxy_url, ssl_verify)
+        self.download_mmdb_database(mmdb_config['account_id'], license_key, mmdb_config['maxmind_database_file'], proxy_url, ssl_verify)
 
         flag = self.is_lookup_present()
         logger.debug(f"is_lookup_present = {flag}")
@@ -312,7 +312,7 @@ class MaxMindDatabaseUtil(object):
                 method='POST', raiseAllErrors=True)
 
 
-    def download_mmdb_database(self, account_id, license_key, proxy_url=None, ssl_verify=True):
+    def download_mmdb_database(self, account_id, license_key, database_file, proxy_url=None, ssl_verify=True):
         proxies = None
         if proxy_url:
             proxies = {
@@ -322,7 +322,7 @@ class MaxMindDatabaseUtil(object):
 
         logger.debug("Downloading the MaxMind DB file.")
         try:
-            r = requests.get(MaxMindDatabaseDownloadLink, auth=(account_id, license_key), allow_redirects=True, proxies=proxies, verify=ssl_verify)
+            r = requests.get(MaxMindDatabaseDownloadLink.format(database_file), auth=(account_id, license_key), allow_redirects=True, proxies=proxies, verify=ssl_verify)
         except Exception as err:
             logger.exception(f"Failed to download MaxMind DB file from {MaxMindDatabaseDownloadLink}")
             raise err
@@ -349,11 +349,18 @@ class MaxMindDatabaseUtil(object):
                 if filedir.startswith("GeoLite2-City_"):
                     downloaded_dir = os.path.join(DB_DIR_TEMP_PATH, filedir)
                     break
+                elif filedir.startswith("GeoIP2-City_"):
+                    downloaded_dir = os.path.join(DB_DIR_TEMP_PATH, filedir)
+                    break
 
             # Find downloaded file
             downloaded_file = None
             for filedir in os.listdir(downloaded_dir):
                 if filedir.startswith("GeoLite2-City"):
+                    downloaded_file = os.path.join(downloaded_dir, filedir)
+                    logger.info(f"Downloaded MaxMind DB file: {downloaded_file}")
+                    break
+                elif filedir.startswith("GeoIP2-City"):
                     downloaded_file = os.path.join(downloaded_dir, filedir)
                     logger.info(f"Downloaded MaxMind DB file: {downloaded_file}")
                     break

@@ -11,6 +11,7 @@ require([
                 response = response.data.entry[0].content;
                 $("#mmdb_configuration_mmdb_account_id").val(response['maxmind_database_account_id']);
                 $("#mmdb_configuration_mmdb_license_key").val(response['maxmind_database_license_key']);
+                $("input[name='mmdb_geo_database'][value='" + response['maxmind_database_file'] + "']").prop("checked", true);
                 $("#mmdb_config_proxy_url").val(response['mmdb_config_proxy_url']);
                 // $("#mmdb_config_is_ssl_verify").prop('checked', response['mmdb_config_is_ssl_verify']);
             }
@@ -38,6 +39,8 @@ require([
         let maxmind_database_account_id = $('#mmdb_configuration_mmdb_account_id').val();
         let maxmind_database_license_key = $("#mmdb_configuration_mmdb_license_key").val();
 
+        let maxmind_geo_database_file = $("input[name='mmdb_geo_database']:checked").val();
+
         let mmdb_config_proxy_url = $("#mmdb_config_proxy_url").val();
         if (mmdb_config_proxy_url.trim() == ""){
             mmdb_config_proxy_url = "None";
@@ -55,6 +58,7 @@ require([
         let data = {
             "maxmind_database_account_id": maxmind_database_account_id,
             "maxmind_database_license_key": maxmind_database_license_key,
+            "maxmind_database_file": maxmind_geo_database_file,
             "mmdb_config_proxy_url": mmdb_config_proxy_url
             // "mmdb_config_is_ssl_verify": mmdb_config_is_ssl_verify
         };
