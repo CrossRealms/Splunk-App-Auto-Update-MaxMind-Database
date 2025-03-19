@@ -47,7 +47,7 @@ class MaxMindDBConfRestcall(admin.MConfigHandler):
 
 
     def handleList(self, conf_info):
-        # Get MaxMindDB Account ID
+        # Get MaxMindDB Account ID and Database File
         try:
             logger.info("MaxMind Account details GET request.")
 
@@ -56,6 +56,7 @@ class MaxMindDBConfRestcall(admin.MConfigHandler):
 
             account_id = ''
             license_key = '******'
+            maxmind_database_file = ''
             mmdb_config_proxy_url = 'None'
             # is_ssl_verify = True
 
@@ -69,10 +70,12 @@ class MaxMindDBConfRestcall(admin.MConfigHandler):
             for i in data:
                 if i['name'] == mmdb_utils.MMDB_CONF_STANZA:
                     account_id = i['content']['account_id']
+                    maxmind_database_file = i['content']['maxmind_database_file']
                     # is_ssl_verify = i['content']['is_ssl_verify']
                     break
             conf_info['action']['maxmind_database_account_id'] = account_id
             conf_info['action']['maxmind_database_license_key'] = license_key
+            conf_info['action']['maxmind_database_file'] = maxmind_database_file
             conf_info['action']['mmdb_config_proxy_url'] = mmdb_config_proxy_url
             # conf_info['action']['mmdb_config_is_ssl_verify'] = is_ssl_verify
         except Exception as e:
@@ -89,6 +92,7 @@ class MaxMindDBConfRestcall(admin.MConfigHandler):
             data = json.loads(self.callerArgs['data'][0])
             maxmind_account_id = str(data['maxmind_database_account_id'])
             maxmind_license_key = str(data['maxmind_database_license_key'])
+            maxmind_database_file = str(data['maxmind_database_file'])
             mmdb_config_proxy_url = str(data['mmdb_config_proxy_url'])
             # mmdb_config_is_ssl_verify = data['mmdb_config_is_ssl_verify']
         except Exception as e:
@@ -99,9 +103,13 @@ class MaxMindDBConfRestcall(admin.MConfigHandler):
 
         try:
             logger.info("Storing the Account ID.")
-            # Store Account ID
+            # Store Account ID and Database file
             rest.simpleRequest(f"/servicesNS/nobody/{mmdb_utils.APP_NAME}/configs/conf-{mmdb_utils.MMDB_CONF_FILE}/{mmdb_utils.MMDB_CONF_STANZA}?output_mode=json",
-                               postargs={'account_id': maxmind_account_id},   # , 'is_ssl_verify': mmdb_config_is_ssl_verify},
+                               postargs={
+                                   'account_id': maxmind_account_id,
+                                   'maxmind_database_file': maxmind_database_file
+                                },   
+                                # 'is_ssl_verify': mmdb_config_is_ssl_verify},
                                method='POST',
                                sessionKey=self.getSessionKey()
                             )

@@ -325,7 +325,7 @@ class MaxMindDatabaseUtil(object):
                 "https" : proxy_url
             }
 
-        logger.debug("Downloading the MaxMind DB file.")
+        logger.debug("Downloading the MaxMind DB file: {}.".format(database_file))
         try:
             r = requests.get(MaxMindDatabaseDownloadLink.format(database_file), auth=(account_id, license_key), allow_redirects=True, proxies=proxies, verify=ssl_verify)
         except Exception as err:
