@@ -60,6 +60,7 @@ CONFIGURATION
 
 * App Configuration
   * Open the App and configure Account ID and License Key.
+  * Select Database File you want to update (GeoLite2 (free tier) or GeoIP2 (paid tier)). default:GeoLite2.
   * Optionally you can configure Proxy URL from UI:
       * if your Splunk instance cannot reach the internet directly, you can use proxy url as well.
       * Proxy URL will be stored in encrypted format, so you don't have to worry if in case your proxy URL contains proxy username and password.
@@ -102,6 +103,10 @@ KNOWN LIMITATION
 
 RELEASE NOTES
 -------------
+
+Version 4.1.0 (April 2025)
+* Added support for downloading the MaxMind GeoIP2 database file (paid tier).
+
 Version 4.0.1 (December 2024)
 * Splunk-python-sdk updated to the latest version.
 
@@ -210,4 +215,4 @@ SUPPORT
 * Contact - CrossRealms International Inc.
   * US: +1-312-2784445
 * License Agreement - https://cdn.splunkbase.splunk.com/static/misc/eula.html
-* Copyright - Copyright CrossRealms Internationals, 2024
+* Copyright - Copyright CrossRealms Internationals, 2025

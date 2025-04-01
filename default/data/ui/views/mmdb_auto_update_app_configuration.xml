@@ -19,6 +19,19 @@
             </td>
           </tr>
           <tr>
+            <td style="text-align:left;">Database File</td>
+            <td style="display: flex; gap: 15px; align-items: center;">
+              <span style="display: inline-flex; align-items: center; gap: 5px;">
+                <input type="radio" id="geolite" name="mmdb_geo_database" value="GeoLite2" checked="checked"/>
+                <label for="geolite" style="margin-top:10px;">GeoLite2 (free tier)</label>
+              </span>
+              <span style="display: inline-flex; align-items: center; gap: 5px;">
+                <input type="radio" id="geoip" name="mmdb_geo_database" value="GeoIP2"/>
+                <label for="geoip" style="margin-top:10px;">GeoIP2 (paid tier)</label>
+              </span>
+            </td>
+          </tr>
+          <tr>
             <td><p></p></td>
           </tr>
           <tr>

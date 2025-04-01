@@ -28,14 +28,12 @@ MAXMIND_PROXY_URL_IN_PASSWORD_STORE = 'max_mind_proxy_url'
 LIMITS_CONF_STANZA = 'iplocation'
 LIMITS_CONF_PARAMETER = 'db_path'
 
-MaxMindDatabaseDownloadLink = 'https://download.maxmind.com/geoip/databases/GeoLite2-City/download?suffix=tar.gz'
+MaxMindDatabaseDownloadLink = 'https://download.maxmind.com/geoip/databases/{}-City/download?suffix=tar.gz'
 
 MMDB_PATH_DIR = 'mmdb'
-MMDB_FILE_NAME = 'GeoLite2-City.mmdb'
 
 ACCEPTED_LOOKUP_NAME = 'GeoIP2-City.mmdb'
 LOOKUP_DIR_LOCATION = splunk_lib_util.make_splunkhome_path(['var', 'run','splunk', 'lookup_tmp'])
-LOOKUP_FILE_LOCATION = os.path.join(LOOKUP_DIR_LOCATION, MMDB_FILE_NAME)
 
 
 APP_PATH = splunk_lib_util.make_splunkhome_path(["etc", "apps", APP_NAME])
@@ -45,7 +43,6 @@ APP_LOCAL_PATH = os.path.join(APP_PATH, 'local')
 DB_DIR_TEMP_PATH = os.path.join(APP_LOCAL_PATH, MMDB_PATH_DIR)
 DB_TEMP_DOWNLOAD = os.path.join(DB_DIR_TEMP_PATH, "temp_file.gz")
 
-OLD_DB_PATH = os.path.join(DB_DIR_TEMP_PATH, MMDB_FILE_NAME)
 APP_LOCAL_LIMITS_CONF_PATH = os.path.join(APP_LOCAL_PATH, 'limits.conf')
 
 
@@ -168,12 +165,22 @@ class MaxMindDatabaseUtil(object):
             logger.error(msg)
             raise Exception(msg)
 
+        if mmdb_config['maxmind_database_file'] not in ["GeoLite2", "GeoIP2"]:
+            msg = f"Invalid database file: {mmdb_config['maxmind_database_file']}. Supported database files are 'GeoLite2' and 'GeoIP2'."
+            logger.error(msg)
+            raise Exception(msg)
+
         # Read MaxMind license key
         license_key = self.get_max_mind_license_key()
         if not license_key:
             msg = "Max Mind license key not found in password store. Please update config from Max Mind database configuration page."
             logger.error(msg)
             raise Exception(msg)
+
+        # Dynamic mmdb_file_name and lookup_file
+        self.mmdb_file_name = '{}-City.mmdb'.format(mmdb_config['maxmind_database_file'])
+        self.lookup_file_location = os.path.join(LOOKUP_DIR_LOCATION, self.mmdb_file_name)
+        self.old_db_path = os.path.join(DB_DIR_TEMP_PATH, self.mmdb_file_name)
 
         # Read Proxy URL
         proxy_url = None
@@ -211,7 +218,7 @@ class MaxMindDatabaseUtil(object):
         logger.info(f"Max Mind ssl_verify={ssl_verify}")
 
         # Download mmdb database in a appropriate directory
-        self.download_mmdb_database(mmdb_config['account_id'], license_key, proxy_url, ssl_verify)
+        self.download_mmdb_database(mmdb_config['account_id'], license_key, mmdb_config['maxmind_database_file'], proxy_url, ssl_verify)
 
         flag = self.is_lookup_present()
         logger.debug(f"is_lookup_present = {flag}")
@@ -266,7 +273,7 @@ class MaxMindDatabaseUtil(object):
         if os.path.exists(APP_LOCAL_LIMITS_CONF_PATH):
             current_location = self.get_mmdb_location()
             logger.debug(f"dbpath value from iplocation stanza = {current_location}")
-            if current_location == OLD_DB_PATH:
+            if current_location == self.old_db_path:
                 # set empty value in dbpath
                 rest.simpleRequest(
                     f'/servicesNS/nobody/{APP_NAME}/configs/conf-limits/{LIMITS_CONF_STANZA}',
@@ -299,7 +306,7 @@ class MaxMindDatabaseUtil(object):
                 "/servicesNS/nobody/search/data/lookup-table-files",
                 self.session_key,
                 getargs= {'output_mode': 'json', 'count': '0'},
-                postargs= {'name': ACCEPTED_LOOKUP_NAME, 'eai:data': LOOKUP_FILE_LOCATION},
+                postargs= {'name': ACCEPTED_LOOKUP_NAME, 'eai:data': self.lookup_file_location},
                 method='POST', raiseAllErrors=True)
 
 
@@ -308,11 +315,11 @@ class MaxMindDatabaseUtil(object):
                 "/servicesNS/nobody/search/data/lookup-table-files/" + ACCEPTED_LOOKUP_NAME,
                 self.session_key,
                 getargs= {'output_mode': 'json', 'count': '0'},
-                postargs= {'eai:data': LOOKUP_FILE_LOCATION},
+                postargs= {'eai:data': self.lookup_file_location},
                 method='POST', raiseAllErrors=True)
 
 
-    def download_mmdb_database(self, account_id, license_key, proxy_url=None, ssl_verify=True):
+    def download_mmdb_database(self, account_id, license_key, database_file, proxy_url=None, ssl_verify=True):
         proxies = None
         if proxy_url:
             proxies = {
@@ -320,9 +327,9 @@ class MaxMindDatabaseUtil(object):
                 "https" : proxy_url
             }
 
-        logger.debug("Downloading the MaxMind DB file.")
+        logger.debug("Downloading the MaxMind DB file: {}.".format(database_file))
         try:
-            r = requests.get(MaxMindDatabaseDownloadLink, auth=(account_id, license_key), allow_redirects=True, proxies=proxies, verify=ssl_verify)
+            r = requests.get(MaxMindDatabaseDownloadLink.format(database_file), auth=(account_id, license_key), allow_redirects=True, proxies=proxies, verify=ssl_verify)
         except Exception as err:
             logger.exception(f"Failed to download MaxMind DB file from {MaxMindDatabaseDownloadLink}")
             raise err
@@ -349,6 +356,9 @@ class MaxMindDatabaseUtil(object):
                 if filedir.startswith("GeoLite2-City_"):
                     downloaded_dir = os.path.join(DB_DIR_TEMP_PATH, filedir)
                     break
+                elif filedir.startswith("GeoIP2-City_"):
+                    downloaded_dir = os.path.join(DB_DIR_TEMP_PATH, filedir)
+                    break
 
             # Find downloaded file
             downloaded_file = None
@@ -357,11 +367,15 @@ class MaxMindDatabaseUtil(object):
                     downloaded_file = os.path.join(downloaded_dir, filedir)
                     logger.info(f"Downloaded MaxMind DB file: {downloaded_file}")
                     break
+                elif filedir.startswith("GeoIP2-City"):
+                    downloaded_file = os.path.join(downloaded_dir, filedir)
+                    logger.info(f"Downloaded MaxMind DB file: {downloaded_file}")
+                    break
 
             try:
                 # Move extracted file to lookup_tmp location with updated file name
-                shutil.move(downloaded_file, LOOKUP_FILE_LOCATION)
-                logger.debug(f"MaxMind DB file added: {LOOKUP_FILE_LOCATION}")
+                shutil.move(downloaded_file, self.lookup_file_location)
+                logger.debug(f"MaxMind DB file added: {self.lookup_file_location}")
 
                 # Remove temp files
                 logger.debug(f"Removing temp directories. {DB_DIR_TEMP_PATH} and {downloaded_dir}")
