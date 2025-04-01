@@ -105,7 +105,7 @@ RELEASE NOTES
 -------------
 
 Version 4.1.0 (April 2025)
-* Added support for downloading the MaxMind GeoIP2 file (paid tier).
+* Added support for downloading the MaxMind GeoIP2 database file (paid tier).
 
 Version 4.0.1 (December 2024)
 * Splunk-python-sdk updated to the latest version.
@@ -215,4 +215,4 @@ SUPPORT
 * Contact - CrossRealms International Inc.
   * US: +1-312-2784445
 * License Agreement - https://cdn.splunkbase.splunk.com/static/misc/eula.html
-* Copyright - Copyright CrossRealms Internationals, 2024
+* Copyright - Copyright CrossRealms Internationals, 2025
