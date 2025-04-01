@@ -104,7 +104,7 @@ KNOWN LIMITATION
 RELEASE NOTES
 -------------
 
-Version 4.1.0 (March 2025)
+Version 4.1.0 (April 2025)
 * Added support for downloading the MaxMind GeoIP2 file (paid tier).
 
 Version 4.0.1 (December 2024)
