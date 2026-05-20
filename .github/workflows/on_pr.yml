@@ -1,0 +1,19 @@
+name: "Build and Local App Inspect"
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  on_pr:
+    name: "Build and Local App Inspect"
+    runs-on: "ubuntu-latest"
+
+    steps:
+      - uses: VatsalJagani/splunk-app-action@v6
+        with:
+          app_dir: "."
+          to_make_permission_changes: true
+          local_app_inspect: true
+          python_requirements_file: "lib/requirements.txt"
+          is_remove_not_allowed_executables_from_lib: true

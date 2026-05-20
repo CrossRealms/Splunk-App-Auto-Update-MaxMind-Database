@@ -1,23 +1,20 @@
-# This is a basic workflow to generate build
-name: "pre-release"
+name: "Build, Splunkbase App Inspect, App Utilities"
 
-# Controls when the action will run. Triggers the workflow on push or pull request
-# events but only for the current branch
 on:
   push:
     branches:
-      - '*'         # matches every branch that doesn't contain a '/'
-      - '*/*'       # matches every branch containing a single '/'
-      - '**'        # matches every branch
+      - 'main'
+      - 'master'
+      - 'develop'
   workflow_dispatch:
 
 jobs:
-  pre-release:
-    name: "Pre Release"
+  on_main:
+    name: "Build, Splunkbase App Inspect, App Utilities"
     runs-on: "ubuntu-latest"
-    
+
     steps:
-      - uses: VatsalJagani/splunk-app-action@v4.1
+      - uses: VatsalJagani/splunk-app-action@v6
         env:
           SPLUNK_APP_ACTION_1: "rm -rf backup_app_icons"
           SPLUNK_APP_ACTION_2: "rm -f .gitignore"
@@ -28,8 +25,8 @@ jobs:
           to_make_permission_changes: true
           splunkbase_username: ${{ secrets.SPLUNKBASE_USERNAME }}
           splunkbase_password: ${{ secrets.SPLUNKBASE_PASSWORD }}
-          app_utilities: "whats_in_the_app, logger, splunk_python_sdk"
-          my_github_token: ${{ secrets.MY_GITHUB_TOKEN }}
+          app_utilities: "whats_in_the_app, logger"
           logger_log_files_prefix: "auto_update_maxmind_db"
           logger_sourcetype: "auto_update_maxmind_db:logs"
-          splunk_python_sdk_install_path: "lib"
+          python_requirements_file: "lib/requirements.txt"
+          is_remove_not_allowed_executables_from_lib: true
