@@ -16,3 +16,4 @@ jobs:
           to_make_permission_changes: true
           local_app_inspect: true
           python_requirements_file: "lib/requirements.txt"
+          is_remove_not_allowed_executables_from_lib: true
