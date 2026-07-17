@@ -5,7 +5,7 @@ import json
 import requests
 import tarfile
 import shutil
-from six.moves.urllib.parse import quote
+from urllib.parse import quote
 
 import splunk.entity as entity
 import splunk.appserver.mrsparkle.lib.util as splunk_lib_util
@@ -342,7 +342,7 @@ class MaxMindDatabaseUtil(object):
             try:
             # Extract the downloaded file
                 with tarfile.open(DB_TEMP_DOWNLOAD, "r:gz") as tar:
-                    tar.extractall(DB_DIR_TEMP_PATH)
+                    tar.extractall(DB_DIR_TEMP_PATH, filter='data')
             except tarfile.ReadError as e:
                 msg = f"Unable to extract downloaded MaxMind database. {e}"
                 logger.exception(msg)
