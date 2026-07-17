@@ -104,6 +104,12 @@ KNOWN LIMITATION
 RELEASE NOTES
 -------------
 
+Version 4.2.0 (July 2026)
+* Added compatibility with Python 3.13.
+    * Replaced the `six` compatibility shim with the standard library `urllib.parse`.
+    * Hardened MaxMind database archive extraction with the `data` filter (aligns with Python 3.12+ tarfile changes).
+* Dependencies updated to the latest versions (Splunk Python SDK 3.0.0, requests 2.34.2).
+
 Version 4.1.0 (April 2025)
 * Added support for downloading the MaxMind GeoIP2 database file (paid tier).
 
