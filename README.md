@@ -2,7 +2,7 @@
 Splunk App that auto updates the max-mind database (used for `iplocation` command)
 
 Note:- Do not use App version 2.0.0 and above for Splunk version below 9.0.0.
-- Do not use App version 4.2.0 and above for Splunk version below 10.4.0.
+- Do not use App version 5.0.0 and above for Splunk version below 10.4.0.
 
 
 ### Download from Splunkbase
@@ -105,7 +105,7 @@ KNOWN LIMITATION
 RELEASE NOTES
 -------------
 
-Version 4.2.0 (July 2026)
+Version 5.0.0 (July 2026)
 * Added compatibility with Python 3.13.
     * Replaced the `six` compatibility shim with the standard library `urllib.parse`.
     * Hardened MaxMind database archive extraction with the `data` filter (aligns with Python 3.12+ tarfile changes).
