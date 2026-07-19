@@ -2,6 +2,7 @@
 Splunk App that auto updates the max-mind database (used for `iplocation` command)
 
 Note:- Do not use App version 2.0.0 and above for Splunk version below 9.0.0.
+- Do not use App version 4.2.0 and above for Splunk version below 10.4.0.
 
 
 ### Download from Splunkbase
@@ -15,7 +16,7 @@ The Splunk app auto updates MaxMind database. The database update happens automa
 * Author - CrossRealms International Inc.
 * Creates Index - False
 * Compatible with:
-   * Splunk Enterprise version: 9.0.x
+   * Splunk Enterprise version: 10.4.x
    * OS: Platform independent
    * Browser: Google Chrome, Mozilla Firefox, Safari
 
