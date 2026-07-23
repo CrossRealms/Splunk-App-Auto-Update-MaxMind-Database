@@ -1,7 +1,6 @@
 import import_lib
 
 import os
-import sys
 import json
 import requests
 import tarfile
@@ -30,6 +29,38 @@ LIMITS_CONF_STANZA = 'iplocation'
 LIMITS_CONF_PARAMETER = 'db_path'
 
 MaxMindDatabaseDownloadLink = 'https://download.maxmind.com/geoip/databases/{}-City/download?suffix=tar.gz'
+
+
+def safe_tar_extractall(tar, dest_path):
+    """Extract a tar archive safely, preventing path traversal (CVE-2007-4559).
+
+    Prefers the stdlib 'data' extraction filter, available on Python 3.12+ and
+    the 3.9.17+/3.10.12+/3.11.4+ security releases. On older interpreters that
+    don't support the filter, validates every member (and link target) resolves
+    inside dest_path before extracting.
+    """
+    try:
+        tar.extractall(dest_path, filter='data')
+        return
+    except TypeError:
+        # Interpreter predates extraction filters; fall back to manual validation.
+        pass
+
+    dest_abs = os.path.abspath(dest_path)
+
+    def _within_dest(target_path):
+        target_abs = os.path.abspath(target_path)
+        return target_abs == dest_abs or target_abs.startswith(dest_abs + os.sep)
+
+    for member in tar.getmembers():
+        if not _within_dest(os.path.join(dest_path, member.name)):
+            raise Exception(f"Unsafe path in tar archive (path traversal blocked): {member.name}")
+        if member.issym() or member.islnk():
+            link_target = os.path.join(dest_path, os.path.dirname(member.name), member.linkname)
+            if not _within_dest(link_target):
+                raise Exception(f"Unsafe link in tar archive (path traversal blocked): {member.name} -> {member.linkname}")
+
+    tar.extractall(dest_path)
 
 MMDB_PATH_DIR = 'mmdb'
 
@@ -343,12 +374,9 @@ class MaxMindDatabaseUtil(object):
             try:
             # Extract the downloaded file
                 with tarfile.open(DB_TEMP_DOWNLOAD, "r:gz") as tar:
-                    # The 'data' extraction filter (safer) is only available on
-                    # Python 3.12+; older interpreters (e.g. 3.9) reject the keyword.
-                    if sys.version_info >= (3, 12):
-                        tar.extractall(DB_DIR_TEMP_PATH, filter='data')
-                    else:
-                        tar.extractall(DB_DIR_TEMP_PATH)
+                    # Extract safely on both Python 3.9 and 3.13 (uses the 'data'
+                    # filter where available; validates members otherwise).
+                    safe_tar_extractall(tar, DB_DIR_TEMP_PATH)
             except tarfile.ReadError as e:
                 msg = f"Unable to extract downloaded MaxMind database. {e}"
                 logger.exception(msg)
