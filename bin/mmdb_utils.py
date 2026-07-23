@@ -1,6 +1,7 @@
 import import_lib
 
 import os
+import sys
 import json
 import requests
 import tarfile
@@ -342,7 +343,12 @@ class MaxMindDatabaseUtil(object):
             try:
             # Extract the downloaded file
                 with tarfile.open(DB_TEMP_DOWNLOAD, "r:gz") as tar:
-                    tar.extractall(DB_DIR_TEMP_PATH, filter='data')
+                    # The 'data' extraction filter (safer) is only available on
+                    # Python 3.12+; older interpreters (e.g. 3.9) reject the keyword.
+                    if sys.version_info >= (3, 12):
+                        tar.extractall(DB_DIR_TEMP_PATH, filter='data')
+                    else:
+                        tar.extractall(DB_DIR_TEMP_PATH)
             except tarfile.ReadError as e:
                 msg = f"Unable to extract downloaded MaxMind database. {e}"
                 logger.exception(msg)
