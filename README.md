@@ -15,7 +15,7 @@ The Splunk app auto updates MaxMind database. The database update happens automa
 * Author - CrossRealms International Inc.
 * Creates Index - False
 * Compatible with:
-   * Splunk Enterprise version: 9.0.x
+   * Splunk Enterprise version: 10.2.x, 10.4.x
    * OS: Platform independent
    * Browser: Google Chrome, Mozilla Firefox, Safari
 
@@ -103,6 +103,12 @@ KNOWN LIMITATION
 
 RELEASE NOTES
 -------------
+
+Version 4.2.0 (July 2026)
+* Added compatibility with Python 3.13 while retaining Python 3.9 / existing Splunk support.
+    * Replaced the `six` compatibility shim with the standard library `urllib.parse`.
+    * MaxMind database archive extraction uses the `data` filter on Python 3.12+ and falls back gracefully on older interpreters.
+* Dependencies pinned to versions compatible with both Python 3.9 and 3.13 (Splunk Python SDK 2.1.1, requests 2.32.5).
 
 Version 4.1.0 (April 2025)
 * Added support for downloading the MaxMind GeoIP2 database file (paid tier).
