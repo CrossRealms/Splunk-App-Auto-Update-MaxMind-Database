@@ -10,7 +10,7 @@ https://splunkbase.splunk.com/app/5482/
 
 OVERVIEW
 --------
-The Splunk app auto updates MaxMind database. The database update happens automatically every week. Also, user can update database just by running a search query.
+The Splunk app auto updates MaxMind database. The database update happens automatically every day. Also, user can update database just by running a search query.
 
 * Author - CrossRealms International Inc.
 * Creates Index - False
@@ -31,14 +31,23 @@ The Splunk app auto updates MaxMind database. The database update happens automa
 
 TOPOLOGY AND SETTING UP SPLUNK ENVIRONMENT
 ------------------------------------------
-This app can be set up in two ways: 
-  1. Standalone Mode: 
-     * Install the `Auto Update MaxMind Database`.
-     * App setup is required.
-  2. Distributed Mode: 
-     * Install the `Auto Update MaxMind Database` only on the search head.
-     * App setup is required on SH.
-     * App installation is not required on any other instance.
+Install the app **only on the search tier (search head)**. It never needs to be installed on indexers.
+
+  1. **Standalone (single instance)**
+     * Install the `Auto Update MaxMind Database` app.
+     * Complete the app setup (see CONFIGURATION).
+
+  2. **Distributed (separate search head and indexers)**
+     * Install the app on the search head only.
+     * Complete the app setup on the search head.
+     * No installation is required on indexers or any other instance.
+
+  3. **Search Head Cluster (SHC)** — install through the deployer:
+     1. Copy the app package to the SHC **deployer** and extract it into `$SPLUNK_HOME/etc/shcluster/apps/`.
+     2. Push it to the members from the deployer:
+        `splunk apply shcluster-bundle -target https://<any-member>:8089 -auth <admin>:<password>`
+     3. Complete the app setup (Account ID + License Key) on **any one** member. The configuration and stored credentials replicate to the other members automatically.
+     4. The scheduled update runs on the cluster **captain**, and the resulting `GeoIP2-City.mmdb` lookup replicates to every member automatically.
 
 
 INSTALLATION
@@ -76,6 +85,27 @@ CONFIGURATION
   * See troubleshooting for more details.
 
 
+HOW THE DATABASE IS APPLIED
+---------------------------
+This app **does not** overwrite the database that ships with Splunk under `$SPLUNK_HOME/share/`. Instead, it uploads the freshly downloaded database as a Splunk **lookup table file** in the `search` app:
+
+```
+$SPLUNK_HOME/etc/apps/search/lookups/GeoIP2-City.mmdb
+```
+
+Splunk's `iplocation` command uses this file **automatically** — no `limits.conf` change is required. Per the Splunk documentation, a `.mmdb` added this way "is treated as a lookup table by the Splunk software" and "takes precedence over manual updates to the .mmdb file path in `limits.conf`."
+
+What this gives you:
+* **Automatic use:** `iplocation` reads the uploaded lookup table ahead of the bundled `$SPLUNK_HOME/share/` database, so the weekly update is applied with no further configuration.
+* **Automatic replication:** because it is a lookup in the `search` app, the file is distributed through knowledge-bundle replication — to indexers in distributed search, and to every member of a search head cluster.
+* **Naming:** the file is always named `GeoIP2-City.mmdb`, even when you selected the free **GeoLite2** tier. This is the name `iplocation` expects.
+
+References (Splunk documentation):
+* `iplocation` command — "Updating the IP geolocation database file" and "Storing the .mmdb file in a different file path" (lookup-table treatment and `limits.conf` precedence):
+  * [Splunk Enterprise 9.3](https://help.splunk.com/en/splunk-enterprise/search/spl-search-reference/9.3/search-commands/iplocation)
+  * [Splunk Enterprise 10.4](https://help.splunk.com/en/splunk-enterprise/search/spl-search-reference/10.4/search-commands/iplocation)
+
+
 HOW TO GENERATE NEW LICENSE KEY FOR FREE
 ----------------------------------------
   * Create free account on https://www.maxmind.com/en/geolite2/signup?utm_source=kb&utm_medium=kb-link&utm_campaign=kb-create-account
@@ -95,10 +125,6 @@ To uninstall app, user can follow below steps:
 * Remove the `splunk_maxmind_db_auto_update` folder from apps directory
 * Restart Splunk
 
-
-KNOWN LIMITATION
-----------------
-* NA
 
 
 RELEASE NOTES
@@ -205,8 +231,23 @@ TROUBLESHOOTING
   * Run `| maxminddbupdate` search from the `Auto Update MaxMind Database` App.
   * In ideal scenario, it should show message `Max Mind Database updated successfully.`.
 
+* "The file in `$SPLUNK_HOME/share/` still shows an old date, so the update isn't working."
+  * This is expected — the app never modifies `$SPLUNK_HOME/share/`. It uploads the updated file to `$SPLUNK_HOME/etc/apps/search/lookups/GeoIP2-City.mmdb`, which `iplocation` uses automatically (see **HOW THE DATABASE IS APPLIED**). Don't judge the update by the `share/` file's timestamp.
+  * Confirm the lookup file exists and has a recent timestamp at `$SPLUNK_HOME/etc/apps/search/lookups/GeoIP2-City.mmdb`.
+
+* The update fails, or you do not get the `Max Mind Database updated successfully.` message.
+  * Check the app logs (below) for the specific error, then verify:
+    * The **Account ID** and **License Key** are correct — re-enter them on the configuration page if unsure.
+    * The selected **tier matches your license** — choosing **GeoIP2 (paid)** without a paid subscription makes the download fail (e.g. HTTP 401).
+    * If the instance has no direct internet access, a valid **Proxy URL** is configured, and your **SSL/certificate** settings are correct (see CONFIGURATION → Advanced Guide).
+
 * App Logs
   * Run `index=_internal sourcetype="auto_update_maxmind_db:logs"` in the search to see app's internal logs
+
+
+KNOWN LIMITATION
+----------------
+* **Search Head Cluster — the setup page may reappear on other members.** After you configure the app on one member, the configuration replicates to the other members, but opening the app on a different member can still show the setup (configuration) page as if it were not configured. This is display-only — the app *is* configured and the scheduled update runs on the captain. You do not need to re-enter the Account ID and License Key on each member.
 
 
 
@@ -220,5 +261,6 @@ SUPPORT
 -------
 * Contact - CrossRealms International Inc.
   * US: +1-312-2784445
+  * splunkteam@crossrealms.com
 * License Agreement - https://cdn.splunkbase.splunk.com/static/misc/eula.html
-* Copyright - Copyright CrossRealms Internationals, 2025
+* Copyright - Copyright CrossRealms Internationals, 2026
